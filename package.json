@@ -35,7 +35,8 @@
   "license": "MIT",
   "dependencies": {
     "@oclif/core": "^4.0.0",
-    "execa": "^9.5.2"
+    "execa": "^9.5.2",
+    "p-limit": "^7.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

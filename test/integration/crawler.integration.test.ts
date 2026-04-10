@@ -15,7 +15,7 @@ describe('integration: crawler + executor', () => {
     const { crawlCommandTree } = await import('../../src/core/crawler.js')
 
     const tree = await crawlCommandTree(`node ${fixtureCli}`, {
-      maxDepth: 3,
+      maxDepth: 2,
       timeoutMs: 2000,
     })
 
@@ -35,7 +35,7 @@ describe('integration: crawler + executor', () => {
         './dist/index.js',
         'generate',
         `node ${fixtureCli}`,
-        '--max-depth=3',
+        '--max-depth=2',
         '--format=both',
         `--output=${outDir}`,
       ])

@@ -43,6 +43,11 @@ export default class GenerateCommand extends Command {
       min: 100,
       default: 5000,
     }),
+    concurrency: Flags.integer({
+      description: 'Maximum number of help commands to run in parallel',
+      min: 1,
+      default: 4,
+    }),
     parser: Flags.string({
       description: 'Force parser plugin name',
     }),
@@ -58,6 +63,7 @@ export default class GenerateCommand extends Command {
 
     const warnings: string[] = []
     const tree = await crawlCommandTree(args.command, {
+      concurrency: flags.concurrency,
       maxDepth: flags['max-depth'],
       timeoutMs: flags.timeout,
       parserName: flags.parser,

@@ -82,4 +82,45 @@ describe('crawlCommandTree', () => {
     expect(tree.name).toBe('gh')
     expect(tree.path).toEqual(['gh'])
   })
+
+  it('limits concurrent child help execution', async () => {
+    let active = 0
+    let maxActive = 0
+
+    const outputs = new Map<string, string>([
+      [
+        'tool',
+        [
+          'Usage: tool [command]',
+          '',
+          'Commands:',
+          '  alpha    Alpha command',
+          '  beta     Beta command',
+          '  gamma    Gamma command',
+        ].join('\n'),
+      ],
+      ['tool alpha', 'Usage: tool alpha'],
+      ['tool beta', 'Usage: tool beta'],
+      ['tool gamma', 'Usage: tool gamma'],
+    ])
+
+    const tree = await crawlCommandTree('tool', {
+      concurrency: 2,
+      maxDepth: 1,
+      timeoutMs: 1000,
+      executor: async (path) => {
+        active += 1
+        maxActive = Math.max(maxActive, active)
+
+        await new Promise((resolve) => setTimeout(resolve, 25))
+
+        active -= 1
+        return outputs.get(path.join(' ')) ?? ''
+      },
+    })
+
+    expect(tree.children).toHaveLength(3)
+    expect(maxActive).toBeLessThanOrEqual(2)
+    expect(maxActive).toBeGreaterThan(1)
+  })
 })

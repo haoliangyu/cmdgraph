@@ -21,6 +21,8 @@ Most CLIs are documented in unstructured terminal text. `doclix` turns that into
 - Recursive command discovery from `--help`
 - Plugin parser system (`heuristic`, `oclif`, `commander`, `yargs`, `cobra`, `click`, `typer`, `clap`, `argparse`)
 - Best-effort metadata extraction for arguments, examples, and aliases
+- Concurrency control for recursive help crawling
+- Automatic in-memory caching of help outputs within a process
 - Timeout-safe command execution using `execa`
 - Non-interactive execution defaults (`CI=1`, `NO_COLOR=1`)
 - JSON and Markdown output formats
@@ -61,6 +63,7 @@ Examples:
 
 ```bash
 doclix generate git --max-depth=2 --format=both --output=./docs
+doclix generate git --max-depth=3 --concurrency=4 --format=json --output=./docs
 doclix generate kubectl --max-depth=3 --timeout=8000 --format=json --output=./docs
 doclix generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --output=./docs
 ```
@@ -70,6 +73,7 @@ doclix generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --outpu
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
 | `--max-depth` | integer | `2` | Maximum recursion depth for subcommands |
+| `--concurrency` | integer | `4` | Maximum number of help commands to run in parallel |
 | `--format` | `json \| md \| both` | `both` | Output format |
 | `--output` | string | `./docs` | Output directory |
 | `--timeout` | integer | `5000` | Per-command timeout in ms |
@@ -185,8 +189,6 @@ npm run format
 
 ## Roadmap
 
-- Concurrency control (`p-limit`)
-- Caching of help outputs
 
 ## License
 

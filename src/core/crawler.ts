@@ -1,8 +1,10 @@
+import pLimit from 'p-limit'
 import { runHelpCommand } from './executor.js'
 import { createDefaultParserRegistry, ParserRegistry } from './parser-registry.js'
 import type { CommandNode, ParsedCommand } from '../types.js'
 
 export interface CrawlOptions {
+  concurrency?: number
   maxDepth: number
   timeoutMs: number
   parserName?: string
@@ -42,6 +44,7 @@ function resolveNodeName(parsedName: string | undefined, commandPath: string[], 
 
 export async function crawlCommandTree(rootCommand: string, options: CrawlOptions): Promise<CommandNode> {
   const {
+    concurrency = 4,
     maxDepth,
     timeoutMs,
     parserName,
@@ -51,6 +54,7 @@ export async function crawlCommandTree(rootCommand: string, options: CrawlOption
   } = options
 
   const seen = new Set<string>()
+  const limit = pLimit(concurrency)
 
   const visit = async (commandPath: string[], depth: number): Promise<CommandNode> => {
     const normalizedPath = normalizePath(commandPath)
@@ -58,7 +62,7 @@ export async function crawlCommandTree(rootCommand: string, options: CrawlOption
 
     let parsed: ParsedCommand
     try {
-      const helpText = await executor(commandPath, timeoutMs)
+      const helpText = await limit(() => executor(commandPath, timeoutMs))
       const parser = parserRegistry.select(helpText, parserName)
       parsed = parser.parse(helpText)
     } catch (error) {
@@ -78,6 +82,8 @@ export async function crawlCommandTree(rootCommand: string, options: CrawlOption
       return node
     }
 
+    const childTasks: Array<Promise<CommandNode>> = []
+
     for (const subcommandToken of parsed.subcommands) {
       if (isLikelyDynamicSubcommand(subcommandToken)) {
         continue
@@ -95,7 +101,12 @@ export async function crawlCommandTree(rootCommand: string, options: CrawlOption
         continue
       }
 
-      node.children.push(await visit(childPath, depth + 1))
+      seen.add(normalizedChild)
+      childTasks.push(visit(childPath, depth + 1))
+    }
+
+    if (childTasks.length > 0) {
+      node.children = await Promise.all(childTasks)
     }
 
     return node
