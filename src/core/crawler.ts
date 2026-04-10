@@ -28,6 +28,15 @@ function normalizePath(path: string[]): string {
   return path.join(' ')
 }
 
+function resolveNodeName(parsedName: string | undefined, commandPath: string[], normalizedPath: string): string {
+  const candidate = parsedName?.trim()
+  if (candidate && candidate.toLowerCase() !== 'unknown') {
+    return candidate
+  }
+
+  return commandPath[commandPath.length - 1] || normalizedPath
+}
+
 export async function crawlCommandTree(rootCommand: string, options: CrawlOptions): Promise<CommandNode> {
   const {
     maxDepth,
@@ -57,7 +66,7 @@ export async function crawlCommandTree(rootCommand: string, options: CrawlOption
 
     const node: CommandNode = {
       ...parsed,
-      name: parsed.name || commandPath[commandPath.length - 1] || normalizedPath,
+      name: resolveNodeName(parsed.name, commandPath, normalizedPath),
       path: [...commandPath],
       children: [],
     }

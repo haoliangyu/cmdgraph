@@ -1,6 +1,7 @@
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { resolve } from 'node:path'
+import { spawnSync } from 'node:child_process'
 import { execa } from 'execa'
 import { describe } from 'vitest'
 
@@ -11,7 +12,14 @@ export type GeneratedDoc = {
   subcommands: string[]
 }
 
-export const describeInCI = process.env.CI ? describe : describe.skip
+export const describeInCI = describe
+export const E2E_TEST_TIMEOUT_MS = 15000
+
+export function isCliAvailable(command: string): boolean {
+  const checker = process.platform === 'win32' ? 'where' : 'which'
+  const result = spawnSync(checker, [command], { stdio: 'ignore' })
+  return result.status === 0
+}
 
 function toSafeFileStem(command: string): string {
   return command.trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()

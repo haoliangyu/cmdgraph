@@ -71,4 +71,15 @@ describe('crawlCommandTree', () => {
     expect(tree.children).toHaveLength(1)
     expect(tree.children[0].children).toHaveLength(0)
   })
+
+  it('falls back to command token when parser returns unknown name', async () => {
+    const tree = await crawlCommandTree('gh', {
+      maxDepth: 1,
+      timeoutMs: 1000,
+      executor: async () => '',
+    })
+
+    expect(tree.name).toBe('gh')
+    expect(tree.path).toEqual(['gh'])
+  })
 })

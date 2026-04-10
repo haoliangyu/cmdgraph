@@ -47,4 +47,18 @@ describe('heuristicParser', () => {
     expect(parsed.subcommands).toEqual(['auth', 'repo', 'pr', 'alias', 'completion'])
     expect(parsed.options.some((option) => option.flag.includes('--help'))).toBe(true)
   })
+
+  it('extracts name from standalone USAGE heading blocks', () => {
+    const parsed = heuristicParser.parse(`Work seamlessly with GitHub from the command line.
+
+USAGE
+  gh <command> <subcommand> [flags]
+
+CORE COMMANDS
+  auth        Authenticate gh and git with GitHub
+`)
+
+    expect(parsed.name).toBe('gh')
+    expect(parsed.usage).toContain('gh')
+  })
 })

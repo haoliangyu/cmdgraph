@@ -109,16 +109,22 @@ function isKnownSectionHeading(line: string): boolean {
   )
 }
 
+function isSectionHeading(line: string): boolean {
+  const trimmed = line.trim()
+  return /^[A-Za-z][A-Za-z ]+:\s*$/.test(trimmed) || /^[A-Z][A-Z ]+$/.test(trimmed)
+}
+
 function extractUsage(lines: string[]): string | undefined {
-  const usageIndex = lines.findIndex((line) => /^\s*usage\s*:/i.test(line))
+  const usageIndex = lines.findIndex((line) => /^\s*usage(?:\s*:.*)?\s*$/i.test(line))
   if (usageIndex === -1) {
     return undefined
   }
 
-  const firstLine = lines[usageIndex].replace(/^\s*usage\s*:/i, '').trim()
+  const usageLine = lines[usageIndex].trim()
+  const firstLine = usageLine.replace(/^usage\s*:/i, '').trim()
   const usageParts: string[] = []
 
-  if (firstLine) {
+  if (firstLine && !/^usage$/i.test(firstLine)) {
     usageParts.push(firstLine)
   }
 
@@ -134,7 +140,7 @@ function extractUsage(lines: string[]): string | undefined {
       continue
     }
 
-    if (/^[A-Za-z][A-Za-z ]+:\s*$/.test(trimmed)) {
+    if (isSectionHeading(trimmed)) {
       break
     }
 
@@ -167,7 +173,7 @@ function extractName(lines: string[]): string {
 }
 
 function extractDescription(lines: string[]): string | undefined {
-  const usageIndex = lines.findIndex((line) => /^\s*usage\s*:/i.test(line))
+  const usageIndex = lines.findIndex((line) => /^\s*usage(?:\s*:.*)?\s*$/i.test(line))
   const start = usageIndex >= 0 ? usageIndex + 1 : 0
 
   for (let i = start; i < lines.length; i += 1) {
