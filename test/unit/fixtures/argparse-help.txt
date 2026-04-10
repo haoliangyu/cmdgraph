@@ -1,0 +1,10 @@
+usage: app.py [-h] [--verbose] {run,status} ...
+
+A sample argparse application.
+
+positional arguments:
+  {run,status}  available commands
+
+options:
+  -h, --help    show this help message and exit
+  --verbose     enable verbose output

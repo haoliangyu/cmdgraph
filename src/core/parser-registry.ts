@@ -1,10 +1,13 @@
 import type { CLIParser } from './parser.js'
+import { argparseParser } from '../parsers/argparse.js'
 import { cobraParser } from '../parsers/cobra.js'
 import { clapParser } from '../parsers/clap.js'
 import { clickParser } from '../parsers/click.js'
 import { commanderParser } from '../parsers/commander.js'
 import { heuristicParser } from '../parsers/heuristic.js'
 import { oclifParser } from '../parsers/oclif.js'
+import { typerParser } from '../parsers/typer.js'
+import { yargsParser } from '../parsers/yargs.js'
 
 export class ParserRegistry {
   private readonly parsers: CLIParser[] = []
@@ -56,5 +59,15 @@ export class ParserRegistry {
 }
 
 export function createDefaultParserRegistry(): ParserRegistry {
-  return new ParserRegistry([oclifParser, commanderParser, cobraParser, clickParser, clapParser, heuristicParser])
+  return new ParserRegistry([
+    oclifParser,
+    commanderParser,
+    yargsParser,
+    cobraParser,
+    typerParser,
+    clickParser,
+    clapParser,
+    argparseParser,
+    heuristicParser,
+  ])
 }

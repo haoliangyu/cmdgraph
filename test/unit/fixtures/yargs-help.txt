@@ -1,0 +1,12 @@
+mytool <cmd>
+
+Usage: mytool [options] <command>
+
+Commands:
+  serve [port]      start the server
+  lint              lint project files
+
+Options:
+  --help            Show help  [boolean]
+  --version         Show version number  [boolean]
+  --config          Path to config file  [string]

@@ -57,4 +57,35 @@ describe('framework parsers', () => {
     expect(parsed.name).toBe('rg')
     expect(parsed.subcommands).toEqual(['help'])
   })
+
+  it('detects and parses yargs output', async () => {
+    const helpText = await fixture('yargs-help.txt')
+    const parser = createDefaultParserRegistry().select(helpText)
+    const parsed = parser.parse(helpText)
+
+    expect(parser.name).toBe('yargs')
+    expect(parsed.name).toBe('mytool')
+    expect(parsed.subcommands).toEqual(['serve', 'lint'])
+  })
+
+  it('detects and parses argparse output', async () => {
+    const helpText = await fixture('argparse-help.txt')
+    const parser = createDefaultParserRegistry().select(helpText)
+    const parsed = parser.parse(helpText)
+
+    expect(parser.name).toBe('argparse')
+    expect(parsed.name).toBe('app.py')
+    expect(parsed.options.some((option) => option.flag.includes('--verbose'))).toBe(true)
+  })
+
+  it('detects and parses Typer output', async () => {
+    const helpText = await fixture('typer-help.txt')
+    const parser = createDefaultParserRegistry().select(helpText)
+    const parsed = parser.parse(helpText)
+
+    expect(parser.name).toBe('typer')
+    expect(parsed.name).toBe('app')
+    expect(parsed.subcommands).toEqual(['run', 'info'])
+    expect(parsed.options.some((option) => option.flag.includes('--help'))).toBe(true)
+  })
 })

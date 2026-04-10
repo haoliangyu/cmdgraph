@@ -6,7 +6,11 @@ export class CobraParser implements CLIParser {
   public readonly name = 'cobra'
 
   detect(helpText: string): boolean {
-    return /available commands|flags:/i.test(helpText)
+    const hasUsage = /^\s*Usage:\s+\S+/im.test(helpText)
+    const hasAvailableCommandsHeading = /^\s*Available Commands:\s*$/im.test(helpText)
+    const hasFlagsHeading = /^\s*(Flags|Global Flags):\s*$/im.test(helpText)
+
+    return hasUsage && (hasAvailableCommandsHeading || hasFlagsHeading)
   }
 
   parse(helpText: string): ParsedCommand {

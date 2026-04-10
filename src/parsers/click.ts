@@ -8,8 +8,9 @@ export class ClickParser implements CLIParser {
   detect(helpText: string): boolean {
     const hasClickUsage = /^\s*Usage:\s+\S+.*\[OPTIONS\]/im.test(helpText)
     const hasClickHelpLine = /show this message and exit\.?/i.test(helpText)
+    const hasTyperCompletionFlags = /--install-completion|--show-completion/i.test(helpText)
 
-    return hasClickUsage && hasClickHelpLine
+    return hasClickUsage && hasClickHelpLine && !hasTyperCompletionFlags
   }
 
   parse(helpText: string): ParsedCommand {
