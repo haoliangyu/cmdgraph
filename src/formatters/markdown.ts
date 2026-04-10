@@ -14,6 +14,24 @@ function formatNode(node: CommandNode, depth: number): string {
     sections.push(`**Usage:** \`${node.usage}\``)
   }
 
+  if (node.aliases.length > 0) {
+    sections.push(`**Aliases:** ${node.aliases.map((alias) => `\`${alias}\``).join(', ')}`)
+  }
+
+  if (node.arguments.length > 0) {
+    sections.push('**Arguments**')
+    for (const argument of node.arguments) {
+      sections.push(`- \`${argument}\``)
+    }
+  }
+
+  if (node.examples.length > 0) {
+    sections.push('**Examples**')
+    for (const example of node.examples) {
+      sections.push(`- \`${example}\``)
+    }
+  }
+
   if (node.options.length > 0) {
     sections.push('**Options**')
     for (const option of node.options) {

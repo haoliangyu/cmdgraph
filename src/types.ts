@@ -7,6 +7,9 @@ export interface ParsedCommand {
   name: string
   description?: string
   usage?: string
+  aliases: string[]
+  arguments: string[]
+  examples: string[]
   options: Option[]
   subcommands: string[]
 }

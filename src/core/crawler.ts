@@ -15,6 +15,9 @@ function toMinimalParsed(commandPath: string[]): ParsedCommand {
   const name = commandPath[commandPath.length - 1] ?? commandPath.join(' ')
   return {
     name,
+    aliases: [],
+    arguments: [],
+    examples: [],
     options: [],
     subcommands: [],
   }

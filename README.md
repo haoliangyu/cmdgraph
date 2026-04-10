@@ -20,6 +20,7 @@ Most CLIs are documented in unstructured terminal text. `doclix` turns that into
 
 - Recursive command discovery from `--help`
 - Plugin parser system (`heuristic`, `oclif`, `commander`, `yargs`, `cobra`, `click`, `typer`, `clap`, `argparse`)
+- Best-effort metadata extraction for arguments, examples, and aliases
 - Timeout-safe command execution using `execa`
 - Non-interactive execution defaults (`CI=1`, `NO_COLOR=1`)
 - JSON and Markdown output formats
@@ -113,6 +114,9 @@ JSON shape:
 	"name": "git",
 	"description": "The stupid content tracker",
 	"usage": "git [options] [command]",
+	"aliases": [],
+	"arguments": [],
+	"examples": [],
 	"options": [
 		{ "flag": "-h, --help", "description": "display help" }
 	],
@@ -160,6 +164,7 @@ Current test coverage includes:
 - Executor behavior (success + timeout)
 - Heuristic parser with common and real-world fixtures (`git`, `docker`, `kubectl`, `gh` styles)
 - Framework parser detection and parsing fixtures (`oclif`, `commander`, `yargs`, `cobra`, `click`, `typer`, `clap`, `argparse`)
+- Metadata extraction for aliases, arguments, and examples
 - Integration crawling against a real fixture executable
 - End-to-end generation through built CLI, with auto-skip when target CLIs are unavailable
 
@@ -182,7 +187,6 @@ npm run format
 
 - Concurrency control (`p-limit`)
 - Caching of help outputs
-- Richer metadata extraction (arguments, examples, aliases)
 
 ## License
 

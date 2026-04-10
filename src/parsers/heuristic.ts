@@ -1,10 +1,15 @@
 import type { CLIParser } from '../core/parser.js'
 import type { ParsedCommand } from '../types.js'
 
+function isSectionHeading(line: string): boolean {
+  const trimmed = line.trim()
+  return /^[A-Za-z][A-Za-z ]+:\s*$/.test(trimmed) || /^[A-Z][A-Z ]+$/.test(trimmed)
+}
+
 function findSectionEnd(lines: string[], start: number): number {
   let end = lines.length
   for (let i = start + 1; i < lines.length; i += 1) {
-    if (/^\s*[A-Za-z][A-Za-z ]+:\s*$/.test(lines[i])) {
+    if (isSectionHeading(lines[i] ?? '')) {
       end = i
       break
     }
@@ -29,7 +34,7 @@ function sectionRangesByMatcher(
   const ranges: Array<[number, number]> = []
 
   for (let i = 0; i < lines.length; i += 1) {
-    const headingMatch = lines[i].match(/^\s*([A-Za-z][A-Za-z ]+):\s*$/)
+    const headingMatch = lines[i].match(/^\s*([A-Za-z][A-Za-z ]+):?\s*$/)
     if (!headingMatch) {
       continue
     }
@@ -115,15 +120,14 @@ function collectSectionLines(lines: string[], ranges: Array<[number, number]>): 
   return ranges.flatMap(([start, end]) => lines.slice(start, end))
 }
 
+function uniqueValues(values: string[]): string[] {
+  return [...new Set(values.filter(Boolean))]
+}
+
 function isKnownSectionHeading(line: string): boolean {
   return /^(usage|options?|flags?|commands?|available commands|core commands|additional commands|global flags?):$/i.test(
     line,
   )
-}
-
-function isSectionHeading(line: string): boolean {
-  const trimmed = line.trim()
-  return /^[A-Za-z][A-Za-z ]+:\s*$/.test(trimmed) || /^[A-Z][A-Z ]+$/.test(trimmed)
 }
 
 function extractUsage(lines: string[]): string | undefined {
@@ -169,6 +173,79 @@ function extractUsage(lines: string[]): string | undefined {
   }
 
   return usageParts.join(' ')
+}
+
+function extractAliases(lines: string[]): string[] {
+  const aliases: string[] = []
+
+  for (const line of lines) {
+    const match = line.match(/^\s*aliases?\s*:\s*(.+)$/i)
+    if (!match?.[1]) {
+      continue
+    }
+
+    aliases.push(
+      ...match[1]
+        .split(/[,|]/)
+        .map((value) => value.trim())
+        .filter(Boolean),
+    )
+  }
+
+  return uniqueValues(aliases)
+}
+
+function extractArgumentsFromUsage(usage: string | undefined): string[] {
+  if (!usage) {
+    return []
+  }
+
+  const matches = usage.match(/<[^>]+>|\[[^\]]+\]|\b[A-Z][A-Z0-9_:-]*(?:\.\.\.)?\b/g) ?? []
+  const ignored = new Set(['[options]', '[option]', '[command]', '<command>', '[flags]', '[subcommand]', '[args]'])
+
+  return uniqueValues(
+    matches
+      .map((value) => value.trim())
+      .filter((value) => !ignored.has(value.toLowerCase()))
+      .map((value) => value.replace(/^\[(.+)\]$/, '$1')),
+  )
+}
+
+function extractArguments(lines: string[], usage: string | undefined): string[] {
+  const argumentsFromSections: string[] = []
+  const ranges = sectionRangesByMatcher(lines, (heading) => /argument/i.test(heading))
+
+  for (const raw of collectSectionLines(lines, ranges)) {
+    const line = raw.trim()
+    if (!line || line.startsWith('-')) {
+      continue
+    }
+
+    const token = line.split(/\s{2,}|\t+/)[0]?.trim()
+    if (!token) {
+      continue
+    }
+
+    argumentsFromSections.push(token.replace(/^\[(.+)\]$/, '$1'))
+  }
+
+  return uniqueValues([...extractArgumentsFromUsage(usage), ...argumentsFromSections])
+}
+
+function extractExamples(lines: string[]): string[] {
+  const ranges = sectionRangesByMatcher(lines, (heading) => /^examples?$/i.test(heading))
+  const examples: string[] = []
+
+  for (const raw of collectSectionLines(lines, ranges)) {
+    const line = raw.trim()
+    if (!line) {
+      continue
+    }
+
+    examples.push(line.replace(/^[-*]\s+/, ''))
+  }
+
+  return uniqueValues(examples)
 }
 
 function extractName(lines: string[]): string {
@@ -252,6 +329,9 @@ export class HeuristicParser implements CLIParser {
       name: extractName(lines),
       description: extractDescription(lines),
       usage: extractUsage(lines),
+      aliases: extractAliases(lines),
+      arguments: extractArguments(lines, extractUsage(lines)),
+      examples: extractExamples(lines),
       options: parsedOptions,
       subcommands: parsedSubcommands,
     }

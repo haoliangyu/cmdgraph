@@ -74,4 +74,23 @@ Options:
     expect(parsed.options.some((option) => option.flag.includes('-H'))).toBe(true)
     expect(parsed.options.some((option) => option.flag.includes('--help'))).toBe(true)
   })
+
+  it('extracts aliases, arguments, and examples', () => {
+    const parsed = heuristicParser.parse(`Usage: tool <source> [DEST]
+
+Aliases: t, tl
+
+Arguments:
+  <source>         Input source
+  [DEST]           Output destination
+
+Examples:
+  tool ./input ./output
+  tool --help
+`)
+
+    expect(parsed.aliases).toEqual(['t', 'tl'])
+    expect(parsed.arguments).toEqual(['<source>', 'DEST'])
+    expect(parsed.examples).toEqual(['tool ./input ./output', 'tool --help'])
+  })
 })
