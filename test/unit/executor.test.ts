@@ -31,6 +31,64 @@ describe('runHelpCommand', () => {
     await expect(runHelpCommand(['docker'], 1000)).rejects.toBeInstanceOf(HelpExecutionTimeoutError)
   })
 
+  it('falls back to -h when --help has no output', async () => {
+    vi.mocked(execa)
+      .mockResolvedValueOnce({ all: '' } as Awaited<ReturnType<typeof execa>>)
+      .mockResolvedValueOnce({ all: 'short help output' } as Awaited<ReturnType<typeof execa>>)
+
+    const output = await runHelpCommand(['aws'], 2000)
+
+    expect(output).toBe('short help output')
+    expect(execa).toHaveBeenNthCalledWith(
+      1,
+      'aws',
+      ['--help'],
+      expect.objectContaining({ timeout: 2000 }),
+    )
+    expect(execa).toHaveBeenNthCalledWith(
+      2,
+      'aws',
+      ['-h'],
+      expect.objectContaining({ timeout: 2000 }),
+    )
+  })
+
+  it('falls back to help subcommand after help flags produce no output', async () => {
+    vi.mocked(execa)
+      .mockResolvedValueOnce({ all: '' } as Awaited<ReturnType<typeof execa>>)
+      .mockResolvedValueOnce({ all: '' } as Awaited<ReturnType<typeof execa>>)
+      .mockResolvedValueOnce({ all: '' } as Awaited<ReturnType<typeof execa>>)
+      .mockResolvedValueOnce({ all: 'aws help output' } as Awaited<ReturnType<typeof execa>>)
+
+    const output = await runHelpCommand(['aws'], 2000)
+
+    expect(output).toBe('aws help output')
+    expect(execa).toHaveBeenNthCalledWith(
+      1,
+      'aws',
+      ['--help'],
+      expect.objectContaining({ timeout: 2000 }),
+    )
+    expect(execa).toHaveBeenNthCalledWith(
+      2,
+      'aws',
+      ['-h'],
+      expect.objectContaining({ timeout: 2000 }),
+    )
+    expect(execa).toHaveBeenNthCalledWith(
+      3,
+      'aws',
+      ['-H'],
+      expect.objectContaining({ timeout: 2000 }),
+    )
+    expect(execa).toHaveBeenNthCalledWith(
+      4,
+      'aws',
+      ['help'],
+      expect.objectContaining({ timeout: 2000 }),
+    )
+  })
+
   it('reuses cached output for identical help requests', async () => {
     vi.mocked(execa).mockResolvedValueOnce({ all: 'cached help text' } as Awaited<ReturnType<typeof execa>>)
 

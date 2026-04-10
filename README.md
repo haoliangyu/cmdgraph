@@ -6,7 +6,7 @@
 
 Recursive CLI documentation introspection for humans and AI agents.
 
-`doclix` runs CLI `--help` commands, discovers subcommands recursively, parses the output into structured data, and exports documentation as JSON and Markdown.
+`doclix` runs CLI help commands (`--help`, `-h`, `-H`, or `help`), discovers subcommands recursively, parses the output into structured data, and exports documentation as JSON and Markdown.
 
 ## Why doclix?
 
@@ -18,7 +18,7 @@ Most CLIs are documented in unstructured terminal text. `doclix` turns that into
 
 ## Features
 
-- Recursive command discovery from `--help`
+- Recursive command discovery from `--help`, `-h`, `-H`, or `help`
 - Plugin parser system (`heuristic`, `oclif`, `commander`, `yargs`, `cobra`, `click`, `typer`, `clap`, `argparse`)
 - Best-effort metadata extraction for arguments, examples, and aliases
 - Concurrency control for recursive help crawling
@@ -151,10 +151,16 @@ The stupid content tracker
 
 ## Testing
 
-Run all tests (build + unit/integration/e2e):
+Run default tests (build + unit/integration):
 
 ```bash
 npm test
+```
+
+Run real CLI e2e tests:
+
+```bash
+npm run test:e2e
 ```
 
 Watch mode:
@@ -179,6 +185,7 @@ npm install
 npm run build
 npm run lint
 npm test
+npm run test:e2e
 ```
 
 Format code:
@@ -186,9 +193,6 @@ Format code:
 ```bash
 npm run format
 ```
-
-## Roadmap
-
 
 ## License
 

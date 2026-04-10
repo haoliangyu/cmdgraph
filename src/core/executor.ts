@@ -25,23 +25,31 @@ export async function runHelpCommand(commandPath: string[], timeoutMs: number): 
   }
 
   const [binary, ...args] = commandPath
-  const fullArgs = [...args, '--help']
 
   const pending = (async () => {
     try {
-      const result = await execa(binary, fullArgs, {
-        timeout: timeoutMs,
-        all: true,
-        reject: false,
-        env: {
-          ...process.env,
-          CI: '1',
-          NO_COLOR: '1',
-        },
-        stdin: 'ignore',
-      })
+      const attempts = [[...args, '--help'], [...args, '-h'], [...args, '-H'], [...args, 'help']]
 
-      return (result.all ?? '').trim()
+      for (const fullArgs of attempts) {
+        const result = await execa(binary, fullArgs, {
+          timeout: timeoutMs,
+          all: true,
+          reject: false,
+          env: {
+            ...process.env,
+            CI: '1',
+            NO_COLOR: '1',
+          },
+          stdin: 'ignore',
+        })
+
+        const output = (result.all ?? '').trim()
+        if (output) {
+          return output
+        }
+      }
+
+      return ''
     } catch (error) {
       helpCommandCache.delete(key)
 
