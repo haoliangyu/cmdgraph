@@ -4,7 +4,7 @@ import { cva } from 'class-variance-authority'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import type { CommandNode } from '../types.js'
-import { countNodes, flattenTree, maxDepth, slugify } from './site.js'
+import { flattenTree, slugify } from './site.js'
 
 function cn(...inputs: Array<string | false | null | undefined>): string {
 	return twMerge(clsx(inputs))
@@ -28,11 +28,6 @@ const badgeVariants = cva(
 
 const cardClass =
 	'rounded-3xl border border-border/70 bg-card/90 shadow-[0_24px_80px_-40px_rgba(16,24,40,0.45)] backdrop-blur supports-[backdrop-filter]:bg-card/80'
-
-type SummaryItem = {
-	label: string
-	value: string
-}
 
 type CommandEntry = {
 	node: CommandNode
@@ -109,15 +104,6 @@ function buildStructuredData(root: CommandNode, entries: CommandEntry[], title: 
 	]
 }
 
-function StatCard({ label, value }: SummaryItem): React.JSX.Element {
-	return (
-		<div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-3">
-			<div className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">{label}</div>
-			<div className="mt-2 text-2xl font-semibold text-foreground">{value}</div>
-		</div>
-	)
-}
-
 function SectionTitle({ children }: { children: React.ReactNode }): React.JSX.Element {
 	return <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-muted-foreground">{children}</h3>
 }
@@ -135,7 +121,6 @@ function CommandSection({ entry }: { entry: CommandEntry }): React.JSX.Element {
 		<section id={id} aria-labelledby={`${id}-heading`} className={cn(cardClass, 'scroll-mt-24 px-6 py-6 md:px-8 md:py-8')}>
 			<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
 				<div className="space-y-3">
-					<Badge variant="secondary">{node.path.join(' ')}</Badge>
 					<HeadingTag id={`${id}-heading`} className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
 						{node.path.join(' ')}
 					</HeadingTag>
@@ -232,11 +217,6 @@ function CommandSection({ entry }: { entry: CommandEntry }): React.JSX.Element {
 
 function HtmlDocument({ root }: { root: CommandNode }): React.JSX.Element {
 	const commandEntries = flattenTree(root)
-	const summary: SummaryItem[] = [
-		{ label: 'Commands', value: String(commandEntries.length) },
-		{ label: 'Options', value: String(commandEntries.reduce((total, entry) => total + entry.node.options.length, 0)) },
-		{ label: 'Depth', value: String(maxDepth(root)) },
-	]
 
 	const title = `${root.path.join(' ')} CLI Documentation`
 	const description = root.description ?? `Static CLI documentation for ${root.path.join(' ')}`
@@ -373,60 +353,49 @@ body {
 					<div className="absolute inset-x-0 top-0 -z-10 h-[28rem] bg-[radial-gradient(circle_at_top,_rgba(52,211,153,0.24),_transparent_58%)]" />
 					<div className="absolute right-0 top-24 -z-10 h-72 w-72 rounded-full bg-emerald-300/20 blur-3xl dark:bg-emerald-400/10" />
 					<header className="border-b border-border/60 bg-background/80 backdrop-blur-xl">
-						<div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 lg:px-8">
-							<div>
-								<p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">doclix HTML export</p>
-								<h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">{title}</h1>
+						<div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+							<div className="min-w-0">
+								<h1 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">{title}</h1>
 							</div>
-							<button
-								id="theme-toggle"
-								type="button"
-								className="focus-ring inline-flex items-center gap-3 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-card-foreground shadow-sm transition hover:border-primary/50 hover:text-primary"
-								aria-pressed="false"
-								aria-label="Toggle dark mode"
-							>
-								<span aria-hidden="true">◐</span>
-								<span id="theme-toggle-label">Dark mode</span>
-							</button>
-						</div>
-					</header>
-
-					<div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:grid-cols-[300px_minmax(0,1fr)] lg:px-8 lg:py-14">
-						<aside className="space-y-6 lg:sticky lg:top-8 lg:self-start">
-							<div className={cn(cardClass, 'p-6 shadow-glow')}>
-								<Badge>{root.path.join(' ')}</Badge>
-								<p className="mt-4 text-lg font-semibold tracking-tight text-foreground">Human-readable static CLI docs</p>
-								<p className="mt-3 text-sm leading-6 text-muted-foreground">Static site output generated from the canonical JSON command tree. Ready to host as a single page.</p>
-								<div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-									{summary.map((item) => (
-										<StatCard key={item.label} label={item.label} value={item.value} />
-									))}
-								</div>
-							</div>
-
-							<div className={cn(cardClass, 'p-4')}>
-								<label htmlFor="command-search" className="px-3 pb-2 text-sm font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-									Search commands
-								</label>
-								<div className="px-3">
+							<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end lg:flex-1 lg:max-w-3xl">
+								<div className="w-full sm:max-w-md lg:max-w-xl">
+									<label htmlFor="command-search" className="sr-only">
+										Search commands
+									</label>
 									<input
 										id="command-search"
 										type="search"
 										placeholder="Filter by command, option, alias, or usage"
 										autoComplete="off"
 										spellCheck={false}
-										className="focus-ring w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground"
+										className="focus-ring w-full rounded-2xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground"
 										aria-describedby="command-search-help command-search-status"
 									/>
-									<p id="command-search-help" className="mt-3 text-sm leading-6 text-muted-foreground">
-										Live filter for command sections and the page index. Search works client-side; the full content remains present in the static HTML for crawlers.
+									<p id="command-search-help" className="sr-only">
+										Live filter for command sections and the page index.
 									</p>
 									<p id="command-search-status" role="status" aria-live="polite" className="sr-search-status">
 										Showing all commands.
 									</p>
 								</div>
+								<button
+									id="theme-toggle"
+									type="button"
+									className="focus-ring inline-flex items-center justify-center rounded-full border border-border bg-card p-2.5 text-sm font-medium text-card-foreground shadow-sm transition hover:border-primary/50 hover:text-primary"
+									aria-pressed="false"
+									aria-label="Toggle dark mode"
+								>
+									<span aria-hidden="true">◐</span>
+									<span id="theme-toggle-label" className="sr-only">
+										Dark mode
+									</span>
+								</button>
 							</div>
+						</div>
+					</header>
 
+					<div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:grid-cols-[300px_minmax(0,1fr)] lg:px-8 lg:py-14">
+						<aside className="space-y-6 lg:sticky lg:top-8 lg:self-start">
 							<nav aria-label="Command navigation" className={cn(cardClass, 'p-4')}>
 								<p className="px-3 pb-3 text-sm font-semibold uppercase tracking-[0.22em] text-muted-foreground">On this page</p>
 								<ul className="space-y-1" data-command-nav-list="true">
@@ -446,31 +415,24 @@ body {
 						</aside>
 
 						<main id="main-content" className="space-y-8">
-							<section className={cn(cardClass, 'p-6 md:p-8')}>
-								<div className="flex flex-wrap items-center gap-3">
-									<Badge>Source of truth: JSON</Badge>
-									<Badge variant="secondary">Renderer: HTML</Badge>
-									<Badge variant="outline">Accessible</Badge>
-								</div>
-								<h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">Overview</h2>
-								<p className="mt-4 max-w-3xl text-base leading-7 text-muted-foreground">{description}</p>
-								<div className="mt-6 grid gap-4 md:grid-cols-2">
-									<div className="rounded-2xl border border-border/70 bg-background/70 p-5">
-										<SectionTitle>Root command</SectionTitle>
-										<p className="mt-3 font-mono text-sm text-foreground">{root.path.join(' ')}</p>
-									</div>
-									<div className="rounded-2xl border border-border/70 bg-background/70 p-5">
-										<SectionTitle>Generated structure</SectionTitle>
-										<p className="mt-3 text-sm leading-6 text-muted-foreground">{countNodes(root)} command sections rendered into one static page for documentation hosting.</p>
-									</div>
-								</div>
-							</section>
-
 							{commandEntries.map((entry) => (
 								<CommandSection key={entry.id} entry={entry} />
 							))}
 						</main>
 					</div>
+					<footer className="border-t border-border/60 bg-background/80">
+						<div className="mx-auto max-w-7xl px-6 py-4 text-center text-sm text-muted-foreground lg:px-8">
+							Created with{' '}
+							<a
+								href="https://github.com/haoliangyu/doclix"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
+							>
+								doclix
+							</a>
+						</div>
+					</footer>
 				</div>
 				<script
 					dangerouslySetInnerHTML={{

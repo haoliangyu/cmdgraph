@@ -2,6 +2,7 @@ import { execute } from '@oclif/core'
 import { pathToFileURL } from 'node:url'
 import { crawlCommandTree } from './core/crawler.js'
 import type { CrawlOptions } from './core/crawler.js'
+import { withRootCommandName } from './core/root-command-name.js'
 import { normalizeFormats } from './formatters/formats.js'
 import type { OutputFormat } from './formatters/formats.js'
 import { formatAsHtml } from './formatters/html.js'
@@ -24,6 +25,7 @@ export interface GenerateOptions {
 	parserRegistry?: CrawlOptions['parserRegistry']
 	executor?: CrawlOptions['executor']
 	format?: OutputFormat | OutputFormat[]
+	rootCommandName?: string
 }
 
 export interface GeneratedDocumentation {
@@ -82,13 +84,15 @@ export async function generateDocumentation(
 		throw new Error('siteBaseUrl is required when generating sitemap output')
 	}
 
+	const outputTree = withRootCommandName(tree, options.rootCommandName)
+
 	return {
-		tree,
-		json: formats.includes('json') ? formatAsJson(tree) : undefined,
-		markdown: formats.includes('md') ? formatAsMarkdown(tree) : undefined,
-		html: formats.includes('html') ? formatAsHtml(tree) : undefined,
-		llmsTxt: formats.includes('llms-txt') ? formatAsLlmsTxt(tree, { siteBaseUrl: options.siteBaseUrl }) : undefined,
-		sitemap: formats.includes('sitemap') ? formatAsSitemap(tree, { siteBaseUrl: options.siteBaseUrl as string }) : undefined,
+		tree: outputTree,
+		json: formats.includes('json') ? formatAsJson(outputTree) : undefined,
+		markdown: formats.includes('md') ? formatAsMarkdown(outputTree) : undefined,
+		html: formats.includes('html') ? formatAsHtml(outputTree) : undefined,
+		llmsTxt: formats.includes('llms-txt') ? formatAsLlmsTxt(outputTree, { siteBaseUrl: options.siteBaseUrl }) : undefined,
+		sitemap: formats.includes('sitemap') ? formatAsSitemap(outputTree, { siteBaseUrl: options.siteBaseUrl as string }) : undefined,
 		warnings,
 	}
 }

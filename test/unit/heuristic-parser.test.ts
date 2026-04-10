@@ -93,4 +93,19 @@ Examples:
     expect(parsed.arguments).toEqual(['<source>', 'DEST'])
     expect(parsed.examples).toEqual(['tool ./input ./output', 'tool --help'])
   })
+
+  it('does not treat required positional arguments as subcommands', () => {
+    const parsed = heuristicParser.parse(`USAGE
+  $ doclix generate COMMAND [flags]
+
+ARGUMENTS
+  COMMAND  Root command to introspect, e.g. git or kubectl
+
+FLAGS
+  --help  Show help
+`)
+
+    expect(parsed.arguments).toContain('COMMAND')
+    expect(parsed.subcommands).not.toContain('COMMAND')
+  })
 })

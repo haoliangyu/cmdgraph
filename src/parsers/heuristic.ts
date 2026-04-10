@@ -124,6 +124,15 @@ function uniqueValues(values: string[]): string[] {
   return [...new Set(values.filter(Boolean))]
 }
 
+function normalizeArgumentToken(value: string): string {
+  return value
+    .trim()
+    .replace(/\.\.\.$/, '')
+    .replace(/^<(.+)>$/, '$1')
+    .replace(/^\[(.+)\]$/, '$1')
+    .toLowerCase()
+}
+
 function isKnownSectionHeading(line: string): boolean {
   return /^(usage|options?|flags?|commands?|available commands|core commands|additional commands|global flags?):$/i.test(
     line,
@@ -309,6 +318,8 @@ export class HeuristicParser implements CLIParser {
 
   parse(helpText: string): ParsedCommand {
     const lines = helpText.split(/\r?\n/)
+    const usage = extractUsage(lines)
+    const argumentsList = extractArguments(lines, usage)
     const optionsRanges = sectionRangesByMatcher(lines, (heading) =>
       /(^|\s)(options|flags)($|\s)/i.test(heading),
     )
@@ -319,7 +330,9 @@ export class HeuristicParser implements CLIParser {
     const fallbackCommandLines = lines.filter((line) => /^\s{2,}[A-Za-z0-9][\w:-]*\s{2,}.+$/.test(line))
 
     const subcommands = parseSubcommands(sectionCommandLines)
-    const parsedSubcommands = subcommands.length > 0 ? subcommands : parseSubcommands(fallbackCommandLines)
+    const rawSubcommands = subcommands.length > 0 ? subcommands : parseSubcommands(fallbackCommandLines)
+    const argumentTokens = new Set(argumentsList.map((value) => normalizeArgumentToken(value)))
+    const parsedSubcommands = rawSubcommands.filter((subcommand) => !argumentTokens.has(subcommand.toLowerCase()))
 
     const legacyOptionsRange = sectionRange(lines, 'Options') ?? sectionRange(lines, 'Flags')
     const legacyOptionsLines = legacyOptionsRange ? lines.slice(legacyOptionsRange[0], legacyOptionsRange[1]) : []
@@ -328,9 +341,9 @@ export class HeuristicParser implements CLIParser {
     return {
       name: extractName(lines),
       description: extractDescription(lines),
-      usage: extractUsage(lines),
+      usage,
       aliases: extractAliases(lines),
-      arguments: extractArguments(lines, extractUsage(lines)),
+      arguments: argumentsList,
       examples: extractExamples(lines),
       options: parsedOptions,
       subcommands: parsedSubcommands,

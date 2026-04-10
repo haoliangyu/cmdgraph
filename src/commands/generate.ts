@@ -2,6 +2,7 @@ import { Args, Command, Flags } from '@oclif/core'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { crawlCommandTree } from '../core/crawler.js'
+import { withRootCommandName } from '../core/root-command-name.js'
 import { normalizeFormats } from '../formatters/formats.js'
 import type { OutputFormat } from '../formatters/formats.js'
 import { formatAsHtml } from '../formatters/html.js'
@@ -58,6 +59,9 @@ export default class GenerateCommand extends Command {
     parser: Flags.string({
       description: 'Force parser plugin name',
     }),
+    'root-command-name': Flags.string({
+      description: 'Override displayed root command name in generated outputs',
+    }),
   }
 
   public async run(): Promise<void> {
@@ -81,35 +85,37 @@ export default class GenerateCommand extends Command {
       onWarning: (message) => warnings.push(message),
     })
 
+    const outputTree = withRootCommandName(tree, flags['root-command-name'])
+
     const stem = toSafeFileStem(args.command)
 
     if (formats.includes('json')) {
       const jsonPath = resolve(outputDir, `${stem}.json`)
-      await writeFile(jsonPath, formatAsJson(tree), 'utf8')
+      await writeFile(jsonPath, formatAsJson(outputTree), 'utf8')
       this.log(`Wrote ${jsonPath}`)
     }
 
     if (formats.includes('md')) {
       const markdownPath = resolve(outputDir, `${stem}.md`)
-      await writeFile(markdownPath, formatAsMarkdown(tree), 'utf8')
+      await writeFile(markdownPath, formatAsMarkdown(outputTree), 'utf8')
       this.log(`Wrote ${markdownPath}`)
     }
 
     if (formats.includes('html')) {
       const htmlPath = resolve(outputDir, 'index.html')
-      await writeFile(htmlPath, formatAsHtml(tree), 'utf8')
+      await writeFile(htmlPath, formatAsHtml(outputTree), 'utf8')
       this.log(`Wrote ${htmlPath}`)
     }
 
     if (formats.includes('llms-txt')) {
       const llmsTxtPath = resolve(outputDir, 'llms.txt')
-      await writeFile(llmsTxtPath, formatAsLlmsTxt(tree, { siteBaseUrl: flags['site-base-url'] }), 'utf8')
+      await writeFile(llmsTxtPath, formatAsLlmsTxt(outputTree, { siteBaseUrl: flags['site-base-url'] }), 'utf8')
       this.log(`Wrote ${llmsTxtPath}`)
     }
 
     if (formats.includes('sitemap')) {
       const sitemapPath = resolve(outputDir, 'sitemap.xml')
-      await writeFile(sitemapPath, formatAsSitemap(tree, { siteBaseUrl: flags['site-base-url'] as string }), 'utf8')
+      await writeFile(sitemapPath, formatAsSitemap(outputTree, { siteBaseUrl: flags['site-base-url'] as string }), 'utf8')
       this.log(`Wrote ${sitemapPath}`)
     }
 
