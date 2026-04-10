@@ -79,6 +79,39 @@ doclix generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --outpu
 | `--timeout` | integer | `5000` | Per-command timeout in ms |
 | `--parser` | string | auto-detect | Force a parser plugin by name |
 
+## Library Usage
+
+`doclix` can also be used as a library:
+
+```ts
+import { generate, introspect } from 'doclix'
+
+const { tree, warnings } = await introspect('git', {
+	maxDepth: 2,
+	timeoutMs: 5000,
+	concurrency: 4,
+})
+
+const generated = await generate('git', {
+	'max-depth': 2,
+	timeout: 5000,
+	concurrency: 4,
+	parser: 'heuristic',
+	format: 'both',
+})
+
+console.log(generated.json)
+console.log(generated.markdown)
+```
+
+Library API notes:
+
+- `introspect(command, options)` returns `{ tree, warnings }`
+- `generate(command, options)` returns `{ tree, json?, markdown?, warnings }`
+- `options.format` supports `json`, `md`, or `both` (default)
+- `generate` options align with CLI flag names: `max-depth`, `timeout`, `concurrency`, `parser`, and `format`
+- advanced injection (`executor`, `parserRegistry`) is available for tests/custom integration
+
 ## Supported Parsers
 
 `doclix` uses a plugin-based parser registry. You can force one with `--parser`, or let `doclix` auto-detect.
@@ -175,6 +208,7 @@ Current test coverage includes:
 - Heuristic parser with common and real-world fixtures (`git`, `docker`, `kubectl`, `gh` styles)
 - Framework parser detection and parsing fixtures (`oclif`, `commander`, `yargs`, `cobra`, `click`, `typer`, `clap`, `argparse`)
 - Metadata extraction for aliases, arguments, and examples
+- Library API tests for programmatic introspection and formatted output generation
 - Integration crawling against a real fixture executable
 - End-to-end generation through built CLI, with auto-skip when target CLIs are unavailable
 

@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "CLI documentation introspection tool for AI agents",
   "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "bin": {
     "doclix": "bin/run.js"
   },
