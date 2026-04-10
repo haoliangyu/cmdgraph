@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { crawlCommandTree } from '../src/core/crawler.js'
+import { crawlCommandTree } from '../../src/core/crawler.js'
 
 describe('crawlCommandTree', () => {
   it('builds a nested command tree from mocked executor output', async () => {

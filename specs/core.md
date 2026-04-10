@@ -269,7 +269,8 @@ Create sample help outputs for:
 Store under:
 
 ```
-test/fixtures/
+test/unit/fixtures/
+test/integration/fixtures/
 ```
 
 ---

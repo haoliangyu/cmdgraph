@@ -10,9 +10,9 @@ function toSafeFileStem(command: string): string {
 
 describe('integration: crawler + executor', () => {
   it('crawls nested commands from a real executable fixture', async () => {
-    const fixtureCli = resolve('test/fixtures/fakecli.mjs')
+    const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
 
-    const { crawlCommandTree } = await import('../src/core/crawler.js')
+    const { crawlCommandTree } = await import('../../src/core/crawler.js')
 
     const tree = await crawlCommandTree(`node ${fixtureCli}`, {
       maxDepth: 3,
@@ -27,7 +27,7 @@ describe('integration: crawler + executor', () => {
   })
 
   it('generates docs end-to-end through the built CLI', async () => {
-    const fixtureCli = resolve('test/fixtures/fakecli.mjs')
+    const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
     const outDir = await mkdtemp(resolve(tmpdir(), 'doclix-e2e-'))
 
     try {

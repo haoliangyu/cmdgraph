@@ -1,10 +1,10 @@
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { heuristicParser } from '../src/parsers/heuristic.js'
+import { heuristicParser } from '../../src/parsers/heuristic.js'
 
 async function fixture(name: string): Promise<string> {
-  return readFile(resolve('test/fixtures', name), 'utf8')
+  return readFile(resolve('test/unit/fixtures', name), 'utf8')
 }
 
 describe('heuristicParser', () => {

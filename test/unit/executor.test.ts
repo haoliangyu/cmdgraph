@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { execa } from 'execa'
-import { HelpExecutionTimeoutError, runHelpCommand } from '../src/core/executor.js'
+import { HelpExecutionTimeoutError, runHelpCommand } from '../../src/core/executor.js'
 
 vi.mock('execa', () => ({
   execa: vi.fn(),
