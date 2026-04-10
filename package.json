@@ -1,0 +1,53 @@
+{
+  "name": "doclix",
+  "version": "0.1.0",
+  "description": "CLI documentation introspection tool for AI agents",
+  "type": "module",
+  "bin": {
+    "doclix": "bin/run.js"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist coverage",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "npm run build && vitest run",
+    "test:watch": "vitest",
+    "prepare": "husky",
+    "lint:fix": "eslint . --fix",
+    "test:unit": "vitest run --exclude test/crawler.integration.test.ts"
+  },
+  "keywords": [
+    "cli",
+    "documentation",
+    "introspection",
+    "oclif"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@oclif/core": "^4.0.0",
+    "execa": "^9.5.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@typescript-eslint/eslint-plugin": "^8.18.1",
+    "@typescript-eslint/parser": "^8.18.1",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "oclif": {
+    "bin": "doclix",
+    "commands": "./dist/commands"
+  }
+}

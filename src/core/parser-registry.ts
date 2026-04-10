@@ -1,0 +1,57 @@
+import type { CLIParser } from './parser.js'
+import { cobraParser } from '../parsers/cobra.js'
+import { heuristicParser } from '../parsers/heuristic.js'
+import { oclifParser } from '../parsers/oclif.js'
+
+export class ParserRegistry {
+  private readonly parsers: CLIParser[] = []
+
+  constructor(parsers: CLIParser[] = []) {
+    for (const parser of parsers) {
+      this.register(parser)
+    }
+  }
+
+  register(parser: CLIParser): void {
+    if (this.parsers.some((candidate) => candidate.name === parser.name)) {
+      throw new Error(`Parser \"${parser.name}\" is already registered`)
+    }
+
+    this.parsers.push(parser)
+  }
+
+  get(name: string): CLIParser | undefined {
+    return this.parsers.find((parser) => parser.name === name)
+  }
+
+  list(): CLIParser[] {
+    return [...this.parsers]
+  }
+
+  select(helpText: string, forcedParserName?: string): CLIParser {
+    if (forcedParserName) {
+      const parser = this.get(forcedParserName)
+      if (!parser) {
+        throw new Error(`Unknown parser \"${forcedParserName}\"`)
+      }
+
+      return parser
+    }
+
+    const detected = this.parsers.find((parser) => parser.detect(helpText))
+    if (detected) {
+      return detected
+    }
+
+    const fallback = this.get('heuristic')
+    if (!fallback) {
+      throw new Error('No fallback parser registered')
+    }
+
+    return fallback
+  }
+}
+
+export function createDefaultParserRegistry(): ParserRegistry {
+  return new ParserRegistry([heuristicParser, oclifParser, cobraParser])
+}

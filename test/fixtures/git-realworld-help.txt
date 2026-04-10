@@ -1,0 +1,20 @@
+usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>] [--exec-path[=<path>]]
+
+These are common Git commands used in various situations:
+
+start a working area (see also: git help tutorial)
+   clone      Clone a repository into a new directory
+   init       Create an empty Git repository or reinitialize an existing one
+
+work on the current change (see also: git help everyday)
+   add        Add file contents to the index
+   mv         Move or rename a file, a directory, or a symlink
+   restore    Restore working tree files
+
+examine the history and state (see also: git help revisions)
+   log        Show commit logs
+   status     Show the working tree status
+
+Options:
+  -v, --version   Print version
+  -h, --help      Print help

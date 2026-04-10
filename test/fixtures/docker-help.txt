@@ -1,0 +1,13 @@
+Usage:  docker [OPTIONS] COMMAND
+
+A self-sufficient runtime for containers
+
+Commands:
+  run         Run a command in a new container
+  ps          List containers
+  images      List images
+
+Options:
+      --config string      Location of client config files
+  -D, --debug              Enable debug mode
+  -H, --host list          Daemon socket(s) to connect to

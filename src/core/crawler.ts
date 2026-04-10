@@ -1,0 +1,93 @@
+import { runHelpCommand } from './executor.js'
+import { createDefaultParserRegistry, ParserRegistry } from './parser-registry.js'
+import type { CommandNode, ParsedCommand } from '../types.js'
+
+export interface CrawlOptions {
+  maxDepth: number
+  timeoutMs: number
+  parserName?: string
+  parserRegistry?: ParserRegistry
+  executor?: (commandPath: string[], timeoutMs: number) => Promise<string>
+  onWarning?: (message: string) => void
+}
+
+function toMinimalParsed(commandPath: string[]): ParsedCommand {
+  const name = commandPath[commandPath.length - 1] ?? commandPath.join(' ')
+  return {
+    name,
+    options: [],
+    subcommands: [],
+  }
+}
+
+function isLikelyDynamicSubcommand(token: string): boolean {
+  return /^[:<{[]/.test(token)
+}
+
+function normalizePath(path: string[]): string {
+  return path.join(' ')
+}
+
+export async function crawlCommandTree(rootCommand: string, options: CrawlOptions): Promise<CommandNode> {
+  const {
+    maxDepth,
+    timeoutMs,
+    parserName,
+    parserRegistry = createDefaultParserRegistry(),
+    executor = runHelpCommand,
+    onWarning,
+  } = options
+
+  const seen = new Set<string>()
+
+  const visit = async (commandPath: string[], depth: number): Promise<CommandNode> => {
+    const normalizedPath = normalizePath(commandPath)
+    seen.add(normalizedPath)
+
+    let parsed: ParsedCommand
+    try {
+      const helpText = await executor(commandPath, timeoutMs)
+      const parser = parserRegistry.select(helpText, parserName)
+      parsed = parser.parse(helpText)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      onWarning?.(`Skipping \"${normalizedPath}\": ${message}`)
+      parsed = toMinimalParsed(commandPath)
+    }
+
+    const node: CommandNode = {
+      ...parsed,
+      name: parsed.name || commandPath[commandPath.length - 1] || normalizedPath,
+      path: [...commandPath],
+      children: [],
+    }
+
+    if (depth >= maxDepth) {
+      return node
+    }
+
+    for (const subcommandToken of parsed.subcommands) {
+      if (isLikelyDynamicSubcommand(subcommandToken)) {
+        continue
+      }
+
+      const subcommandParts = subcommandToken.split(/\s+/).filter(Boolean)
+      if (subcommandParts.length === 0) {
+        continue
+      }
+
+      const childPath = [...commandPath, ...subcommandParts]
+      const normalizedChild = normalizePath(childPath)
+
+      if (seen.has(normalizedChild)) {
+        continue
+      }
+
+      node.children.push(await visit(childPath, depth + 1))
+    }
+
+    return node
+  }
+
+  return visit(rootCommand.split(/\s+/).filter(Boolean), 0)
+}

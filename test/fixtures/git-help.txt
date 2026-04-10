@@ -1,0 +1,12 @@
+usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
+
+The stupid content tracker
+
+Commands:
+  add       Add file contents to the index
+  commit    Record changes to the repository
+  push      Update remote refs
+
+Options:
+  -v, --version    output version information
+  -h, --help       display help for command

@@ -1,0 +1,17 @@
+Work seamlessly with GitHub from the command line.
+
+Usage:
+  gh <command> <subcommand> [flags]
+
+Core Commands:
+  auth        Authenticate gh and git with GitHub
+  repo        Create, clone, fork, and view repositories
+  pr          Create, view, and check out pull requests
+
+Additional Commands:
+  alias       Create command shortcuts
+  completion  Generate shell completion scripts
+
+Global Flags:
+  --help      Show help for command
+  -R, --repo  Select another repository

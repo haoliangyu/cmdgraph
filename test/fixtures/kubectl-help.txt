@@ -1,0 +1,15 @@
+kubectl controls the Kubernetes cluster manager.
+
+Usage:
+  kubectl [flags]
+  kubectl [command]
+
+Available Commands:
+  apply         Apply a configuration to a resource
+  get           Display one or many resources
+  version       Print the client and server version information
+
+Flags:
+      --kubeconfig string   Path to the kubeconfig file
+  -n, --namespace string    If present, the namespace scope for this CLI request
+  -h, --help                help for kubectl
