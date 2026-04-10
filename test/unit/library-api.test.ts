@@ -27,12 +27,13 @@ describe('library API', () => {
     expect(result.warnings).toEqual([])
   })
 
-  it('generates JSON and Markdown content in library mode', async () => {
+  it('generates all explicitly requested output formats in library mode', async () => {
     const outputs = new Map<string, string>([['tool', 'Usage: tool [command]']])
 
     const generated = await generate('tool', {
       'max-depth': 0,
-      format: ['json', 'md'],
+      format: ['json', 'md', 'html', 'llms-txt', 'sitemap'],
+      siteBaseUrl: 'https://docs.example.com/tool/',
       timeout: 1000,
       concurrency: 1,
       parser: 'heuristic',
@@ -42,6 +43,9 @@ describe('library API', () => {
     expect(generated.tree.name).toBe('tool')
     expect(generated.json).toContain('"name": "tool"')
     expect(generated.markdown).toContain('## tool')
+    expect(generated.html).toContain('<title>tool CLI Documentation</title>')
+    expect(generated.llmsTxt).toContain('Primary HTML documentation: https://docs.example.com/tool/index.html')
+    expect(generated.sitemap).toContain('<loc>https://docs.example.com/tool/index.html</loc>')
     expect(generated.warnings).toEqual([])
   })
 
@@ -58,5 +62,20 @@ describe('library API', () => {
 
     expect(generated.json).toContain('"name": "tool"')
     expect(generated.markdown).toBeUndefined()
+  })
+
+  it('requires siteBaseUrl for sitemap output in library mode', async () => {
+    const outputs = new Map<string, string>([['tool', 'Usage: tool [command]']])
+
+    await expect(
+      generate('tool', {
+        'max-depth': 0,
+        format: ['sitemap'],
+        timeout: 1000,
+        concurrency: 1,
+        parser: 'heuristic',
+        executor: async (path) => outputs.get(path.join(' ')) ?? '',
+      }),
+    ).rejects.toThrow('siteBaseUrl is required when generating sitemap output')
   })
 })

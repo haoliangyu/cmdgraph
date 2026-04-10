@@ -6,7 +6,7 @@
 
 Recursive CLI documentation introspection for humans and AI agents.
 
-`doclix` runs CLI help commands (`--help`, `-h`, `-H`, or `help`), discovers subcommands recursively, parses the output into structured data, and exports documentation as JSON and Markdown.
+`doclix` runs CLI help commands (`--help`, `-h`, `-H`, or `help`), discovers subcommands recursively, parses the output into structured data, and exports documentation as JSON, Markdown, static HTML, `llms.txt`, and `sitemap.xml`.
 
 ## Why doclix?
 
@@ -14,6 +14,9 @@ Most CLIs are documented in unstructured terminal text. `doclix` turns that into
 
 - Machine-friendly JSON for indexing, retrieval, and agent pipelines
 - Human-readable Markdown for generated docs and internal references
+- Static single-page HTML for hosting CLI docs as a site
+- Explicit `llms.txt` output for LLM-facing discovery
+- Explicit `sitemap.xml` output for search-engine discovery
 - A command tree (AST) that preserves hierarchy and relationships
 
 ## Features
@@ -25,7 +28,9 @@ Most CLIs are documented in unstructured terminal text. `doclix` turns that into
 - Automatic in-memory caching of help outputs within a process
 - Timeout-safe command execution using `execa`
 - Non-interactive execution defaults (`CI=1`, `NO_COLOR=1`)
-- JSON and Markdown output formats
+- JSON, Markdown, static HTML, `llms.txt`, and `sitemap.xml` output formats
+- Searchable single-page HTML docs with client-side command filtering
+- Search-engine and LLM-friendly discovery artifacts without coupling them to HTML output
 - Unit + integration + e2e tests with deterministic fixtures
 
 ## Requirements
@@ -63,6 +68,8 @@ Examples:
 
 ```bash
 doclix generate git --max-depth=2 --format=json --format=md --output=./docs
+doclix generate git --max-depth=2 --format=html --output=./site
+doclix generate git --max-depth=2 --format=llms-txt --format=sitemap --site-base-url=https://docs.example.com/git/ --output=./site
 doclix generate git --max-depth=3 --concurrency=4 --format=json --output=./docs
 doclix generate kubectl --max-depth=3 --timeout=8000 --format=json --output=./docs
 doclix generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --output=./docs
@@ -74,9 +81,10 @@ doclix generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --outpu
 | --- | --- | --- | --- |
 | `--max-depth` | integer | `2` | Maximum recursion depth for subcommands |
 | `--concurrency` | integer | `4` | Maximum number of help commands to run in parallel |
-| `--format` | repeatable `json \| md` | `json` | Output format; repeat the flag to write multiple outputs |
+| `--format` | repeatable `json \| md \| html \| llms-txt \| sitemap` | `json` | Output format; repeat the flag to write multiple outputs |
 | `--output` | string | `./docs` | Output directory |
 | `--timeout` | integer | `5000` | Per-command timeout in ms |
+| `--site-base-url` | string | unset | Base URL used to generate discovery artifacts such as `llms.txt` links and `sitemap.xml` |
 | `--parser` | string | auto-detect | Force a parser plugin by name |
 
 ## Library Usage
@@ -97,19 +105,24 @@ const generated = await generate('git', {
 	timeout: 5000,
 	concurrency: 4,
 	parser: 'heuristic',
-	format: ['json', 'md'],
+	siteBaseUrl: 'https://docs.example.com/git/',
+	format: ['json', 'md', 'html', 'llms-txt', 'sitemap'],
 })
 
 console.log(generated.json)
 console.log(generated.markdown)
+console.log(generated.html)
+console.log(generated.llmsTxt)
+console.log(generated.sitemap)
 ```
 
 Library API notes:
 
 - `introspect(command, options)` returns `{ tree, warnings }`
-- `generate(command, options)` returns `{ tree, json?, markdown?, warnings }`
-- `options.format` supports `json` or `md`; pass an array for multiple outputs, and omit it to default to JSON
-- `generate` options align with CLI flag names: `max-depth`, `timeout`, `concurrency`, `parser`, and `format`
+- `generate(command, options)` returns `{ tree, json?, markdown?, html?, llmsTxt?, sitemap?, warnings }`
+- `options.format` supports `json`, `md`, `html`, `llms-txt`, and `sitemap`; pass an array for multiple outputs, and omit it to default to JSON
+- `options.siteBaseUrl` is required for `sitemap` and is recommended for `llms-txt`
+- `generate` options align with CLI flag names: `max-depth`, `timeout`, `concurrency`, `parser`, `format`, and `siteBaseUrl`
 - advanced injection (`executor`, `parserRegistry`) is available for tests/custom integration
 
 ## Supported Parsers
@@ -134,15 +147,21 @@ Parser selection behavior:
 
 ## Output
 
-For `doclix generate git --format=json --format=md --output=./docs`, you get:
+For `doclix generate git --format=json --format=md --format=html --format=llms-txt --format=sitemap --site-base-url=https://docs.example.com/git/ --output=./docs`, you get:
 
 - `docs/git.json`
 - `docs/git.md`
+- `docs/index.html`
+- `docs/llms.txt`
+- `docs/sitemap.xml`
 
-Why both formats:
+Why these formats:
 
 - JSON is agent-ready because it is structured, stable, and easy to index, diff, validate, and consume in automation pipelines.
 - Markdown is human-readable because it is hierarchy-first, scannable in docs/reviews, and works well in repos, wikis, and generated documentation sites.
+- HTML is hosting-ready because it renders the canonical command tree into a single accessible page with dark mode support and navigation for static-site deployment.
+- `llms.txt` is explicit because it gives LLM crawlers a compact text map of the hosted documentation without embedding that responsibility into the HTML page itself.
+- `sitemap.xml` is explicit because search-engine discovery depends on deployable site URLs, not just local output files.
 
 JSON shape:
 
@@ -182,6 +201,21 @@ The stupid content tracker
 - `push`
 ```
 
+HTML output characteristics:
+
+- generated as a single `index.html` file for static hosting
+- rendered from a React template via server-side rendering
+- styled with Tailwind CSS and shadcn/ui-inspired component patterns
+- modern light-green theme by default, with an accessible dark mode toggle
+- includes client-side command filtering for large documentation pages
+- includes crawlable semantic content, metadata, and structured data for search engines and LLM bots
+
+Discovery artifact characteristics:
+
+- `llms.txt` is generated separately and lists the hosted documentation page plus command-level anchors
+- `sitemap.xml` is generated separately and requires `--site-base-url` so it contains valid deployable URLs
+- HTML output does not implicitly generate either file; request them explicitly with `--format=llms-txt` and `--format=sitemap`
+
 ## Testing
 
 Run default tests (build + unit/integration):
@@ -209,6 +243,8 @@ Current test coverage includes:
 - Framework parser detection and parsing fixtures (`oclif`, `commander`, `yargs`, `cobra`, `click`, `typer`, `clap`, `argparse`)
 - Metadata extraction for aliases, arguments, and examples
 - Library API tests for programmatic introspection and formatted output generation
+- HTML formatter rendering and static site generation
+- Explicit `llms.txt` and `sitemap.xml` generation and validation
 - Integration crawling against a real fixture executable
 - End-to-end generation through built CLI, with auto-skip when target CLIs are unavailable
 

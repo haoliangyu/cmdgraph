@@ -8,7 +8,7 @@ The tool should:
 - Discover commands and subcommands recursively
 - Parse help output into structured data
 - Support multiple CLI frameworks via plugin parsers
-- Output JSON (primary/default) and Markdown (secondary)
+- Output JSON (primary/default), Markdown (secondary), HTML (hosting-oriented), and explicit discovery artifacts (`llms.txt`, `sitemap.xml`)
 - Be extensible, testable, and robust
 
 The CLI itself must be built using **oclif**.
@@ -38,6 +38,8 @@ The CLI itself must be built using **oclif**.
 5. Output:
    - JSON (primary, AI-friendly)
    - Markdown (secondary)
+  - HTML (secondary, static-site ready)
+  - discovery artifacts (`llms.txt`, `sitemap.xml`)
 
 ---
 
@@ -60,9 +62,10 @@ doclix generate kubectl --max-depth=3 --output=./docs
 | Option        | Description                   |
 | ------------- | ----------------------------- |
 | `--max-depth` | Limit recursion depth         |
-| `--format`    | repeatable json or md         |
+| `--format`    | repeatable json, md, html, llms-txt, or sitemap |
 | `--output`    | Output directory              |
 | `--timeout`   | Per-command execution timeout |
+| `--site-base-url` | Base URL for discovery artifacts |
 | `--parser`    | Force parser plugin           |
 
 ---
@@ -77,7 +80,7 @@ CLI input
   → parser (plugin-based)
   → recursive crawler
   → command graph (AST)
-  → formatter (JSON / Markdown)
+  → formatter (JSON / Markdown / HTML / llms.txt / sitemap.xml)
 ```
 
 ---
@@ -206,6 +209,9 @@ Responsibilities:
 
 * `src/formatters/json.ts`
 * `src/formatters/markdown.ts`
+* `src/formatters/html.tsx`
+* `src/formatters/llms-txt.ts`
+* `src/formatters/sitemap.ts`
 
 Responsibilities:
 
@@ -218,6 +224,19 @@ Responsibilities:
 
 * Hierarchical sections
 * Include:
+
+#### HTML
+
+* Static single-page `index.html`
+* Human-readable and hosting-ready
+* Rendered from React template
+* Styled with Tailwind CSS and shadcn/ui-inspired components
+
+#### Discovery Artifacts
+
+* `llms.txt` generated explicitly for LLM discovery
+* `sitemap.xml` generated explicitly for search-engine discovery
+* Neither artifact is implicitly bundled into HTML output
 
   * description
   * usage

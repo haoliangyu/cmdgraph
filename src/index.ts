@@ -4,8 +4,11 @@ import { crawlCommandTree } from './core/crawler.js'
 import type { CrawlOptions } from './core/crawler.js'
 import { normalizeFormats } from './formatters/formats.js'
 import type { OutputFormat } from './formatters/formats.js'
+import { formatAsHtml } from './formatters/html.js'
 import { formatAsJson } from './formatters/json.js'
+import { formatAsLlmsTxt } from './formatters/llms-txt.js'
 import { formatAsMarkdown } from './formatters/markdown.js'
+import { formatAsSitemap } from './formatters/sitemap.js'
 import type { CommandNode } from './types.js'
 
 export type { CommandNode, ParsedCommand, Option } from './types.js'
@@ -17,6 +20,7 @@ export interface GenerateOptions {
 	concurrency?: number
 	timeout?: number
 	parser?: string
+	siteBaseUrl?: string
 	parserRegistry?: CrawlOptions['parserRegistry']
 	executor?: CrawlOptions['executor']
 	format?: OutputFormat | OutputFormat[]
@@ -26,6 +30,9 @@ export interface GeneratedDocumentation {
 	tree: CommandNode
 	json?: string
 	markdown?: string
+	html?: string
+	llmsTxt?: string
+	sitemap?: string
 	warnings: string[]
 }
 
@@ -71,10 +78,17 @@ export async function generateDocumentation(
 	})
 
 	const formats = normalizeFormats(options.format)
+	if (formats.includes('sitemap') && !options.siteBaseUrl) {
+		throw new Error('siteBaseUrl is required when generating sitemap output')
+	}
+
 	return {
 		tree,
 		json: formats.includes('json') ? formatAsJson(tree) : undefined,
 		markdown: formats.includes('md') ? formatAsMarkdown(tree) : undefined,
+		html: formats.includes('html') ? formatAsHtml(tree) : undefined,
+		llmsTxt: formats.includes('llms-txt') ? formatAsLlmsTxt(tree, { siteBaseUrl: options.siteBaseUrl }) : undefined,
+		sitemap: formats.includes('sitemap') ? formatAsSitemap(tree, { siteBaseUrl: options.siteBaseUrl as string }) : undefined,
 		warnings,
 	}
 }

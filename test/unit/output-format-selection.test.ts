@@ -10,7 +10,21 @@ describe('output format selection', () => {
 		expect(normalizeFormats('md')).toEqual(['md'])
 	})
 
+	it('accepts html as a selectable format', () => {
+		expect(normalizeFormats('html')).toEqual(['html'])
+	})
+
+	it('accepts explicit discovery formats', () => {
+		expect(normalizeFormats(['llms-txt', 'sitemap'])).toEqual(['llms-txt', 'sitemap'])
+	})
+
 	it('deduplicates repeated formats while preserving order', () => {
-		expect(normalizeFormats(['json', 'json', 'md', 'md', 'json'])).toEqual(['json', 'md'])
+		expect(normalizeFormats(['json', 'json', 'html', 'llms-txt', 'md', 'html', 'sitemap', 'json'])).toEqual([
+			'json',
+			'html',
+			'llms-txt',
+			'md',
+			'sitemap',
+		])
 	})
 })

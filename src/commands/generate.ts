@@ -4,8 +4,11 @@ import { resolve } from 'node:path'
 import { crawlCommandTree } from '../core/crawler.js'
 import { normalizeFormats } from '../formatters/formats.js'
 import type { OutputFormat } from '../formatters/formats.js'
+import { formatAsHtml } from '../formatters/html.js'
 import { formatAsJson } from '../formatters/json.js'
+import { formatAsLlmsTxt } from '../formatters/llms-txt.js'
 import { formatAsMarkdown } from '../formatters/markdown.js'
+import { formatAsSitemap } from '../formatters/sitemap.js'
 
 function toSafeFileStem(command: string): string {
   return command.trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()
@@ -31,9 +34,12 @@ export default class GenerateCommand extends Command {
     }),
     format: Flags.string({
       description: 'Output format; repeat the flag to write multiple outputs',
-      options: ['json', 'md'],
+      options: ['json', 'md', 'html', 'llms-txt', 'sitemap'],
       multiple: true,
       default: ['json'],
+    }),
+    'site-base-url': Flags.string({
+      description: 'Base site URL used for discovery artifacts such as sitemap and llms.txt links',
     }),
     output: Flags.string({
       description: 'Output directory',
@@ -58,6 +64,10 @@ export default class GenerateCommand extends Command {
     const { args, flags } = await this.parse(GenerateCommand)
 
     const formats = normalizeFormats(flags.format as OutputFormat[] | undefined)
+  	if (formats.includes('sitemap') && !flags['site-base-url']) {
+  		this.error('--site-base-url is required when using --format=sitemap')
+  	}
+
     const outputDir = resolve(flags.output)
 
     await mkdir(outputDir, { recursive: true })
@@ -83,6 +93,24 @@ export default class GenerateCommand extends Command {
       const markdownPath = resolve(outputDir, `${stem}.md`)
       await writeFile(markdownPath, formatAsMarkdown(tree), 'utf8')
       this.log(`Wrote ${markdownPath}`)
+    }
+
+    if (formats.includes('html')) {
+      const htmlPath = resolve(outputDir, 'index.html')
+      await writeFile(htmlPath, formatAsHtml(tree), 'utf8')
+      this.log(`Wrote ${htmlPath}`)
+    }
+
+    if (formats.includes('llms-txt')) {
+      const llmsTxtPath = resolve(outputDir, 'llms.txt')
+      await writeFile(llmsTxtPath, formatAsLlmsTxt(tree, { siteBaseUrl: flags['site-base-url'] }), 'utf8')
+      this.log(`Wrote ${llmsTxtPath}`)
+    }
+
+    if (formats.includes('sitemap')) {
+      const sitemapPath = resolve(outputDir, 'sitemap.xml')
+      await writeFile(sitemapPath, formatAsSitemap(tree, { siteBaseUrl: flags['site-base-url'] as string }), 'utf8')
+      this.log(`Wrote ${sitemapPath}`)
     }
 
     for (const warning of warnings) {

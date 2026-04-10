@@ -8,7 +8,7 @@ This spec establishes a strict pipeline:
 2. Serialize that tree as JSON.
 3. Render all non-JSON formats from the same JSON-compatible tree.
 
-JSON is the default output and the source of truth. Markdown is the current secondary format. Any future format must be rendered from the canonical JSON data model rather than re-reading raw parser output or re-deriving structure independently.
+JSON is the default output and the source of truth. Markdown, HTML, `llms.txt`, and `sitemap.xml` are explicit rendered formats. Any non-JSON format must be rendered from the canonical JSON data model rather than re-reading raw parser output or re-deriving structure independently.
 
 ## Scope
 
@@ -33,8 +33,8 @@ CLI help text
   -> ParsedCommand / CommandNode tree
   -> canonical JSON serialization
   -> format renderers
-      -> current: Markdown
-      -> future: HTML, YAML, XML, manpage, etc.
+      -> current: Markdown, HTML, llms.txt, sitemap.xml
+      -> future: YAML, XML, manpage, etc.
 ```
 
 Current implementation touchpoints:
@@ -42,7 +42,10 @@ Current implementation touchpoints:
 - `src/types.ts`: canonical in-memory output model
 - `src/formatters/json.ts`: canonical JSON serializer
 - `src/formatters/markdown.ts`: Markdown renderer from `CommandNode`
-- `src/index.ts`: library API that returns `tree`, `json`, and `markdown`
+- `src/formatters/html.tsx`: HTML renderer from `CommandNode`
+- `src/formatters/llms-txt.ts`: llms.txt renderer from `CommandNode`
+- `src/formatters/sitemap.ts`: sitemap renderer from `CommandNode`
+- `src/index.ts`: library API that returns `tree`, `json`, `markdown`, `html`, `llmsTxt`, and `sitemap`
 - `src/commands/generate.ts`: CLI command that writes output files
 
 ## Design Principles
@@ -83,6 +86,9 @@ All output formats represent the same command documentation with different prese
 
 - JSON: machine-first, exact structure
 - Markdown: human-first, readable hierarchy
+- HTML: human-first, hosting-oriented static site
+- llms.txt: discovery-first, compact text map for LLM agents
+- sitemap.xml: discovery-first, search-engine sitemap for hosted docs
 - future formats: specialized views for specific publishing or integration targets
 
 ## Canonical Data Model
@@ -180,6 +186,67 @@ Markdown non-goals:
 - becoming a richer source of truth than JSON
 - carrying metadata that is unavailable in the canonical tree
 
+### HTML
+
+Status: current secondary format for static-site publishing.
+
+Current behavior:
+
+- produced by `formatAsHtml(root)`
+- renders a static single-page `index.html`
+- uses a React server-rendered template
+- uses Tailwind CSS and shadcn/ui-inspired component patterns
+- defaults to a modern light-green theme and includes a dark mode toggle
+- includes semantic landmarks, skip navigation, and accessible interactive controls
+- includes client-side filtering for command discovery on large pages
+- includes SEO and LLM-discovery metadata such as descriptive meta tags, structured data, and crawlable static content
+
+HTML responsibilities:
+
+- remain a faithful rendering of the JSON tree
+- optimize for static hosting and human browsing
+- provide a clear information hierarchy and command navigation
+- support in-page discovery through filtering without hiding content from non-JavaScript crawlers
+- expose enough semantic metadata for search engines and LLM agents to understand the page purpose and command inventory
+
+HTML non-goals:
+
+- becoming a richer source of truth than JSON
+- requiring a separate site build pipeline to read generated documentation
+
+### llms.txt
+
+Status: current explicit discovery format for LLM-oriented crawlers and tooling.
+
+Current behavior:
+
+- produced by `formatAsLlmsTxt(root, options)`
+- renders a compact text summary of the hosted docs and command inventory
+- can use relative `index.html` links by default
+- can use absolute URLs when `siteBaseUrl` is provided
+
+llms.txt responsibilities:
+
+- remain a faithful derivative of the canonical tree
+- provide a compact discovery-oriented index for LLM consumers
+- stay explicit and separate from HTML output
+
+### sitemap.xml
+
+Status: current explicit discovery format for search engines.
+
+Current behavior:
+
+- produced by `formatAsSitemap(root, { siteBaseUrl })`
+- renders a sitemap pointing at the hosted `index.html`
+- requires `siteBaseUrl` because sitemap output must contain deployable site URLs
+
+sitemap responsibilities:
+
+- remain a faithful derivative of the canonical output contract
+- provide a standards-aligned discovery artifact for hosted documentation
+- stay explicit and separate from HTML output
+
 ## Current Interface Surface
 
 ### CLI interface
@@ -187,7 +254,7 @@ Markdown non-goals:
 Current CLI output options:
 
 ```ts
-type OutputFormat = 'json' | 'md'
+type OutputFormat = 'json' | 'md' | 'html' | 'llms-txt' | 'sitemap'
 ```
 
 Behavior:
@@ -195,6 +262,9 @@ Behavior:
 - no `--format`: write canonical JSON only
 - `--format=json`: write only canonical JSON
 - `--format=md`: write only Markdown
+- `--format=html`: write only static HTML
+- `--format=llms-txt`: write only `llms.txt`
+- `--format=sitemap`: write only `sitemap.xml` and require `siteBaseUrl`
 - repeated `--format` flags: write each selected output
 
 Implementation note:
@@ -211,6 +281,9 @@ export interface GeneratedDocumentation {
   tree: CommandNode
   json?: string
   markdown?: string
+  html?: string
+  llmsTxt?: string
+  sitemap?: string
   warnings: string[]
 }
 ```
@@ -226,6 +299,7 @@ Current library format selection:
 
 ```ts
 format?: OutputFormat | OutputFormat[]
+siteBaseUrl?: string
 ```
 
 Behavior:
@@ -233,11 +307,13 @@ Behavior:
 - omitted `format` defaults to `json`
 - a single value requests one renderer
 - an array requests multiple renderers
+- `siteBaseUrl` is required for sitemap output and recommended for llms.txt when generating deployable discovery links
 
 Normalization rule:
 
 - format selection should be normalized through shared logic used by both the CLI and library surfaces
 - normalization must default to `json`, remove duplicates, and preserve the first-seen order of requested formats
+- HTML output must not implicitly generate `llms.txt` or `sitemap.xml`; those artifacts are opt-in formats
 
 ## Required Output Pipeline
 
@@ -301,7 +377,6 @@ This interface is descriptive guidance for future expansion. It does not require
 
 Potential future formats include:
 
-- HTML for hosted docs
 - YAML for configuration-oriented integrations
 - XML for legacy pipelines
 - manpage or roff output for terminal documentation
@@ -397,6 +472,48 @@ The HTML renderer would still consume the same canonical tree and would not call
 - If a new format needs extra data, first determine whether that data belongs in the canonical model.
 - If the data is presentation-only, keep it in the renderer.
 - If the data affects all formats, evolve the canonical model carefully and document the change.
+
+## Idea Backlog
+
+These ideas are intentionally documented for follow-up instead of immediate implementation.
+
+### Discovery artifacts
+
+- Add optional canonical URL override for HTML, llms.txt, and sitemap outputs.
+- Add configurable path strategy for sitemap and llms.txt links:
+  - `index.html` path style
+  - directory-style path (`/docs/git/`)
+  - custom page path template
+- Add optional `robots.txt` output format for explicit crawler policy control.
+- Add optional generation timestamp and version metadata blocks for discovery artifacts.
+
+### HTML site UX
+
+- Add optional command index sections grouped by depth and/or top-level namespace.
+- Add optional sticky quick actions (`copy usage`, `copy command path`, `open anchor`).
+- Add optional client-side highlight of matching terms in filtered command sections.
+- Add optional keyboard shortcut (`/`) to focus command search input.
+
+### LLM-oriented output
+
+- Add optional strict profile for llms.txt with shorter, token-efficient entries.
+- Add optional include/exclude controls for fields in llms.txt (`options`, `examples`, `aliases`, etc.).
+- Add optional command-priority hints for large command trees.
+- Add optional per-command short summaries optimized for retrieval indexing.
+
+### Configuration and extensibility
+
+- Add `--config` file support to centralize format settings (base URL, path style, metadata, profiles).
+- Introduce a stable `OutputRenderer` registry for runtime-extensible renderer plugins.
+- Add renderer capability flags (requires base URL, produces hostable page, discovery artifact, etc.).
+- Add output profile presets (for example `hosting`, `llm-indexing`, `developer-docs`).
+
+### Quality and validation
+
+- Add schema validation for generated sitemap and llms.txt structures in tests.
+- Add snapshot-style golden tests for HTML, llms.txt, and sitemap outputs from shared fixtures.
+- Add compatibility tests to ensure discovery artifacts remain deterministic across parser variants.
+- Add link-integrity checks to verify generated anchor URLs exist in HTML output.
 
 ## Non-goals
 

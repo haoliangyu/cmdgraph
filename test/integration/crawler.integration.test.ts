@@ -91,4 +91,85 @@ describe('integration: crawler + executor', () => {
       await rm(outDir, { recursive: true, force: true })
     }
   })
+
+  it('writes a static html site as index.html', async () => {
+    const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
+    const outDir = await mkdtemp(resolve(tmpdir(), 'doclix-e2e-html-'))
+
+    try {
+      await execa('node', [
+        './dist/index.js',
+        'generate',
+        `node ${fixtureCli}`,
+        '--max-depth=2',
+        '--format=html',
+        `--output=${outDir}`,
+      ])
+
+      const htmlPath = resolve(outDir, 'index.html')
+      const htmlContent = await readFile(htmlPath, 'utf8')
+
+      expect(htmlContent).toContain('<!DOCTYPE html>')
+      expect(htmlContent).toContain('CLI Documentation')
+      expect(htmlContent).toContain('id="theme-toggle"')
+      expect(htmlContent).toContain('id="command-search"')
+      expect(htmlContent).toContain('application/ld+json')
+      expect(htmlContent).toContain('doclix-search-index')
+      expect(htmlContent).toContain('config')
+      expect(htmlContent).toContain('user')
+    } finally {
+      await rm(outDir, { recursive: true, force: true })
+    }
+  })
+
+  it('writes explicit llms.txt and sitemap.xml discovery artifacts', async () => {
+    const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
+    const outDir = await mkdtemp(resolve(tmpdir(), 'doclix-e2e-discovery-'))
+
+    try {
+      await execa('node', [
+        './dist/index.js',
+        'generate',
+        `node ${fixtureCli}`,
+        '--max-depth=2',
+        '--format=llms-txt',
+        '--format=sitemap',
+        '--site-base-url=https://docs.example.com/fakecli/',
+        `--output=${outDir}`,
+      ])
+
+      const llmsTxtPath = resolve(outDir, 'llms.txt')
+      const sitemapPath = resolve(outDir, 'sitemap.xml')
+      const llmsTxtContent = await readFile(llmsTxtPath, 'utf8')
+      const sitemapContent = await readFile(sitemapPath, 'utf8')
+
+      expect(llmsTxtContent).toContain('Primary HTML documentation: https://docs.example.com/fakecli/index.html')
+      expect(llmsTxtContent).toContain('https://docs.example.com/fakecli/index.html#node')
+      expect(sitemapContent).toContain('<loc>https://docs.example.com/fakecli/index.html</loc>')
+    } finally {
+      await rm(outDir, { recursive: true, force: true })
+    }
+  })
+
+  it('fails if sitemap is requested without a site base url', async () => {
+    const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
+    const outDir = await mkdtemp(resolve(tmpdir(), 'doclix-e2e-sitemap-error-'))
+
+    try {
+      await expect(
+        execa('node', [
+          './dist/index.js',
+          'generate',
+          `node ${fixtureCli}`,
+          '--max-depth=1',
+          '--format=sitemap',
+          `--output=${outDir}`,
+        ]),
+      ).rejects.toMatchObject({
+        stderr: expect.stringContaining('--site-base-url is required when using --format=sitemap'),
+      })
+    } finally {
+      await rm(outDir, { recursive: true, force: true })
+    }
+  })
 })
