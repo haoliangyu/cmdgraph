@@ -1,0 +1,388 @@
+# Output Format Specification
+
+Purpose: define the output architecture, contracts, and implementation requirements for all serialized formats in doclix.
+
+This spec establishes a strict pipeline:
+
+1. Crawl and parse CLI help into a canonical command tree.
+2. Serialize that tree as JSON.
+3. Render all non-JSON formats from the same JSON-compatible tree.
+
+JSON is the default output and the source of truth. Markdown is the current secondary format. Any future format must be rendered from the canonical JSON data model rather than re-reading raw parser output or re-deriving structure independently.
+
+## Scope
+
+This spec covers:
+
+- output architecture and data flow
+- current format behavior
+- format interfaces and contracts
+- implementation requirements for current and future renderers
+- examples and compatibility rules
+
+This spec does not redefine parser internals, crawler recursion strategy, or executor behavior except where those systems affect output contracts.
+
+## Architecture Summary
+
+High-level flow:
+
+```text
+CLI help text
+  -> executor
+  -> parser registry
+  -> ParsedCommand / CommandNode tree
+  -> canonical JSON serialization
+  -> format renderers
+      -> current: Markdown
+      -> future: HTML, YAML, XML, manpage, etc.
+```
+
+Current implementation touchpoints:
+
+- `src/types.ts`: canonical in-memory output model
+- `src/formatters/json.ts`: canonical JSON serializer
+- `src/formatters/markdown.ts`: Markdown renderer from `CommandNode`
+- `src/index.ts`: library API that returns `tree`, `json`, and `markdown`
+- `src/commands/generate.ts`: CLI command that writes output files
+
+## Design Principles
+
+### 1. JSON is canonical
+
+The `CommandNode` tree serialized by the JSON formatter is the authoritative representation of introspected CLI documentation.
+
+Reasons:
+
+- stable for programmatic consumption
+- easy to diff, validate, test, and version
+- preserves hierarchy explicitly
+- suitable as an interchange layer between crawler/parsers and renderers
+- prevents format-specific logic from diverging across outputs
+
+### 2. Renderers are downstream only
+
+Markdown and any future output format must treat the canonical tree as input.
+
+A renderer may:
+
+- reorder presentation for readability
+- omit empty sections
+- apply format-specific styling or escaping
+
+A renderer must not:
+
+- execute commands
+- inspect raw help text directly
+- re-parse help output
+- infer new command structure not present in the canonical tree
+- mutate the canonical data before other renderers use it
+
+### 3. One data model, many views
+
+All output formats represent the same command documentation with different presentation goals:
+
+- JSON: machine-first, exact structure
+- Markdown: human-first, readable hierarchy
+- future formats: specialized views for specific publishing or integration targets
+
+## Canonical Data Model
+
+The canonical model is the `CommandNode` structure.
+
+```ts
+export interface Option {
+  flag: string
+  description: string
+}
+
+export interface ParsedCommand {
+  name: string
+  description?: string
+  usage?: string
+  aliases: string[]
+  arguments: string[]
+  examples: string[]
+  options: Option[]
+  subcommands: string[]
+}
+
+export interface CommandNode extends ParsedCommand {
+  children: CommandNode[]
+  path: string[]
+}
+```
+
+### Field semantics
+
+- `name`: local command name for the node
+- `description`: best-effort summary text for the command
+- `usage`: normalized usage string or usage block summary
+- `aliases`: alternate command names, preserving parser order
+- `arguments`: documented positional argument names or signatures
+- `examples`: representative command examples extracted from help output
+- `options`: flags supported by the command
+- `subcommands`: discovered child command names from the help text
+- `children`: recursively introspected child nodes
+- `path`: fully qualified command path from root to current node
+
+### Invariants
+
+- arrays must be present even when empty
+- `path` must contain the full command path for the current node
+- `children.length` should correspond to successfully crawled subcommands, not merely declared names
+- `subcommands` preserves discovered names, even if a child could not be crawled
+- output ordering should remain deterministic and follow source order where possible
+
+## Current Output Formats
+
+### JSON
+
+Status: default, canonical, source of truth.
+
+Current behavior:
+
+- produced by `formatAsJson(root)`
+- implemented as pretty-printed `JSON.stringify(root, null, 2)`
+- written when CLI format is `json` or `both`
+- returned by the library API when requested via `generate()`
+
+JSON responsibilities:
+
+- preserve complete command-tree structure
+- preserve parsed metadata without presentation loss
+- provide the most stable integration surface for agents, tests, and downstream renderers
+
+JSON non-goals:
+
+- human-optimized prose layout
+- stylistic grouping or summarization beyond the canonical tree
+
+### Markdown
+
+Status: current secondary format.
+
+Current behavior:
+
+- produced by `formatAsMarkdown(root)`
+- renders the command tree as nested headings
+- omits empty sections
+- displays usage, aliases, arguments, examples, options, and subcommands when present
+- writes one Markdown document per generated root command
+
+Markdown responsibilities:
+
+- remain a faithful rendering of the JSON tree
+- optimize for readability in repositories, docs, and review workflows
+- present hierarchy clearly using heading depth
+
+Markdown non-goals:
+
+- becoming a richer source of truth than JSON
+- carrying metadata that is unavailable in the canonical tree
+
+## Current Interface Surface
+
+### CLI interface
+
+Current CLI output options:
+
+```ts
+type OutputFormat = 'json' | 'md' | 'both'
+```
+
+Behavior:
+
+- `json`: write only canonical JSON
+- `md`: write only Markdown
+- `both`: write JSON and Markdown
+
+Implementation note:
+
+- even if only Markdown is written, the renderer still conceptually depends on the canonical tree, not on raw help text
+- future implementation may choose to materialize JSON in memory first even when no `.json` file is emitted
+
+### Library interface
+
+Current library generation result:
+
+```ts
+export interface GeneratedDocumentation {
+  tree: CommandNode
+  json?: string
+  markdown?: string
+  warnings: string[]
+}
+```
+
+Interpretation:
+
+- `tree` is the canonical in-memory representation
+- `json` is the serialized canonical output
+- `markdown` is a rendered view derived from the same tree
+- `warnings` report crawl/parser issues without changing output shape
+
+## Required Output Pipeline
+
+All current and future formats must follow this logical path:
+
+```text
+CommandNode tree
+  -> canonical JSON-compatible document
+  -> renderer adapter
+  -> target format
+```
+
+Practical requirement:
+
+- formatters must accept `CommandNode` or an equivalent canonical document shape
+- formatters must not depend on parser-specific types or raw executor output
+
+Recommended internal layering for future work:
+
+```ts
+interface OutputRenderer {
+  name: string
+  fileExtension: string
+  render(root: CommandNode): string
+}
+```
+
+This interface is descriptive guidance for future expansion. It does not require immediate refactoring, but any new format should follow this pattern or an equivalent abstraction.
+
+## Implementation Requirements
+
+### General requirements
+
+- JSON remains the canonical serialization format
+- every new renderer must consume the canonical tree only
+- renderer output must be deterministic for identical input
+- empty arrays or missing optional values must be handled gracefully
+- no renderer may mutate the provided `CommandNode`
+- no renderer may introduce undocumented derived fields into the canonical model
+
+### File generation requirements
+
+- output file naming should remain consistent across formats for the same command stem
+- adding a new format should only affect emitted files and format selection logic, not crawl semantics
+- the root command should map to one output artifact per selected format
+
+### Testing requirements
+
+- JSON tests should assert canonical field presence and stability
+- renderer tests should validate output from a fixed canonical fixture tree
+- renderer tests must not rely on executing real CLIs
+- if a new format is added, include at least one golden-output style test or equivalent stable assertion
+
+### Backward-compatibility requirements
+
+- changes to canonical JSON fields are breaking unless explicitly versioned and documented
+- additive fields are preferred over renaming or repurposing existing fields
+- Markdown changes may evolve presentation, but must not materially contradict the canonical JSON content
+
+## Future Format Guidelines
+
+Potential future formats include:
+
+- HTML for hosted docs
+- YAML for configuration-oriented integrations
+- XML for legacy pipelines
+- manpage or roff output for terminal documentation
+- plain text summaries for constrained environments
+
+Requirements for any future format:
+
+1. It must be generated from the canonical tree or canonical JSON-equivalent document.
+2. It must define its audience and presentation goal clearly.
+3. It must document how each canonical field maps into the target format.
+4. It must define escaping, omission, and empty-section behavior.
+5. It must not add command relationships not present in the canonical tree.
+
+Recommended per-format design checklist:
+
+- target audience
+- required fidelity level
+- section mapping for `description`, `usage`, `aliases`, `arguments`, `examples`, `options`, `subcommands`, and `children`
+- encoding and escaping rules
+- file extension and naming
+- test strategy
+
+## Examples
+
+### Example A: Canonical JSON
+
+Input tree concept:
+
+- root command `git`
+- one option
+- two discovered subcommands
+
+Expected JSON:
+
+```json
+{
+  "name": "git",
+  "description": "Distributed version control system",
+  "usage": "git [options] [command]",
+  "aliases": [],
+  "arguments": [],
+  "examples": [],
+  "options": [
+    {
+      "flag": "-h, --help",
+      "description": "Display help"
+    }
+  ],
+  "subcommands": ["add", "commit"],
+  "children": [],
+  "path": ["git"]
+}
+```
+
+### Example B: Markdown Derived From JSON
+
+Given the canonical JSON above, valid Markdown could be:
+
+```md
+# Command Documentation
+
+## git
+Distributed version control system
+
+**Usage:** `git [options] [command]`
+
+**Options**
+- `-h, --help`: Display help
+
+**Subcommands**
+- `add`
+- `commit`
+```
+
+This Markdown is a presentation of the same data. It does not redefine or extend the canonical content.
+
+### Example C: Future HTML Renderer
+
+Conceptual mapping only:
+
+- `path` -> page title / breadcrumb
+- `description` -> summary paragraph
+- `usage` -> code block
+- `options` -> table
+- `children` -> nested navigation sections
+
+The HTML renderer would still consume the same canonical tree and would not call parser logic directly.
+
+## Decision Rules For Future Agents
+
+- If a question concerns output truth, prefer JSON.
+- If a format-specific view disagrees with JSON, JSON is correct.
+- If a new format needs extra data, first determine whether that data belongs in the canonical model.
+- If the data is presentation-only, keep it in the renderer.
+- If the data affects all formats, evolve the canonical model carefully and document the change.
+
+## Non-goals
+
+- supporting separate parser-specific output schemas per framework
+- allowing Markdown or any other human-readable output to become canonical
+- duplicating crawl or parse logic inside renderers
+- creating parallel, format-specific command tree models
