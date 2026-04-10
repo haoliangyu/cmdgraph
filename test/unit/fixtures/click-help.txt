@@ -1,0 +1,11 @@
+Usage: flask [OPTIONS] COMMAND [ARGS]...
+
+A general utility script for Flask applications.
+
+Options:
+  --app TEXT         The Flask application or factory function to load.
+  --help             Show this message and exit.
+
+Commands:
+  run                Run a development server.
+  shell              Run a shell in the app context.

@@ -19,7 +19,7 @@ Most CLIs are documented in unstructured terminal text. `doclix` turns that into
 ## Features
 
 - Recursive command discovery from `--help`
-- Plugin parser system (`heuristic`, `oclif` placeholder, `cobra` placeholder)
+- Plugin parser system (`heuristic`, `oclif`, `commander`, `cobra`, `click`, `clap`)
 - Timeout-safe command execution using `execa`
 - Non-interactive execution defaults (`CI=1`, `NO_COLOR=1`)
 - JSON and Markdown output formats
@@ -79,8 +79,11 @@ doclix generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --outpu
 `doclix` uses a plugin-based parser registry. You can force one with `--parser`, or let `doclix` auto-detect.
 
 - `heuristic`: default and fallback parser; handles common help layouts (`Usage`, `Commands`, `Options`/`Flags`); recommended for most tools.
-- `oclif`: detection-oriented parser entry for oclif-style CLIs; currently delegates to the heuristic parser.
-- `cobra`: detection-oriented parser entry for cobra-style CLIs; currently delegates to the heuristic parser.
+- `oclif`: parser for oclif-style CLIs (supports uppercase section blocks such as `USAGE`, `COMMANDS`, `FLAGS`).
+- `commander`: parser for Commander.js-style output (`display help for command`, `output the version number`).
+- `cobra`: parser for Cobra-style CLIs (`Available Commands`, `Flags`, `Global Flags`).
+- `click`: parser for Click-style output (`[OPTIONS]`, `Show this message and exit`).
+- `clap`: parser for clap-style output (`Print help`, `Print version`).
 
 Parser selection behavior:
 
@@ -153,8 +156,9 @@ Current test coverage includes:
 
 - Executor behavior (success + timeout)
 - Heuristic parser with common and real-world fixtures (`git`, `docker`, `kubectl`, `gh` styles)
+- Framework parser detection and parsing fixtures (`oclif`, `commander`, `cobra`, `click`, `clap`)
 - Integration crawling against a real fixture executable
-- End-to-end generation through built CLI
+- End-to-end generation through built CLI, with auto-skip when target CLIs are unavailable
 
 ## Development
 
@@ -173,7 +177,6 @@ npm run format
 
 ## Roadmap
 
-- Stronger framework-specific parsers (`oclif`, `cobra`)
 - Concurrency control (`p-limit`)
 - Caching of help outputs
 - Richer metadata extraction (arguments, examples, aliases)

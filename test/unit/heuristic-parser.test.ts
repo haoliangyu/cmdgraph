@@ -61,4 +61,17 @@ CORE COMMANDS
     expect(parsed.name).toBe('gh')
     expect(parsed.usage).toContain('gh')
   })
+
+  it('parses short flags including uppercase variants', () => {
+    const parsed = heuristicParser.parse(`Usage: cp [OPTION]... SOURCE DEST
+
+Options:
+  -h  --help                        display this help and exit
+  -H                                follow command-line symbolic links in SOURCE
+`)
+
+    expect(parsed.options.some((option) => option.flag.includes('-h'))).toBe(true)
+    expect(parsed.options.some((option) => option.flag.includes('-H'))).toBe(true)
+    expect(parsed.options.some((option) => option.flag.includes('--help'))).toBe(true)
+  })
 })

@@ -33,7 +33,7 @@ export async function generateJsonFor(command: string): Promise<GeneratedDoc> {
       './dist/index.js',
       'generate',
       command,
-      '--max-depth=1',
+      '--max-depth=5',
       '--format=json',
       `--output=${outDir}`,
       '--timeout=8000',

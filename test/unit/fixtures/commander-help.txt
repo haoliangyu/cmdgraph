@@ -1,0 +1,11 @@
+Usage: acme [options] [command]
+
+Sample Commander.js CLI
+
+Options:
+  -V, --version      output the version number
+  -h, --help         display help for command
+
+Commands:
+  init [name]        initialize a project
+  deploy             deploy the current project

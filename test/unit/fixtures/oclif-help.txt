@@ -1,0 +1,14 @@
+Sample oclif command line app.
+
+VERSION
+  acme-cli/1.0.0 darwin-arm64 node-v20.0.0
+
+USAGE
+  $ acme [COMMAND]
+
+COMMANDS
+  login      Sign in to the service
+  status     Show current status
+
+FLAGS
+  -h, --help  Show CLI help.

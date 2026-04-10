@@ -54,11 +54,21 @@ function parseOptions(lines: string[]): ParsedCommand['options'] {
       continue
     }
 
-    const match = line.match(/^([^\s].*?)(?:\s{2,}|\t+)(.+)$/)
-    if (match) {
+    const columns = line.split(/\s{2,}|\t+/).filter(Boolean)
+    if (columns.length >= 2) {
+      let flag = columns[0] ?? ''
+      let index = 1
+
+      // Some CLIs render aliases in separate columns, e.g. "-h  --help  Show help".
+      while (index < columns.length && columns[index]?.startsWith('-')) {
+        flag += ` ${columns[index]}`
+        index += 1
+      }
+
+      const description = columns.slice(index).join(' ')
       options.push({
-        flag: match[1].trim(),
-        description: match[2].trim(),
+        flag: flag.trim(),
+        description: description.trim(),
       })
       continue
     }
@@ -83,7 +93,9 @@ function parseSubcommands(lines: string[]): string[] {
     }
 
     const normalized = line.replace(/^\*\s+/, '')
-    const match = normalized.match(/^([A-Za-z0-9][\w:-]*)(?:\s*,\s*[\w:-]+)?(?:\s{2,}|\t+).+$/)
+    const match = normalized.match(
+      /^([A-Za-z0-9][\w:-]*)(?:\s*,\s*[\w:-]+)?(?:\s+(?:<[^>]+>|\[[^\]]+\]))*(?:\s{2,}|\t+).+$/,
+    )
     const token = match?.[1]
     if (!token) {
       continue
@@ -162,8 +174,13 @@ function extractUsage(lines: string[]): string | undefined {
 function extractName(lines: string[]): string {
   const usage = extractUsage(lines)
   if (usage) {
-    const candidate = usage.split(/\s+/)[0]
-    if (candidate) {
+    const tokens = usage.split(/\s+/).filter(Boolean)
+    for (const token of tokens) {
+      const candidate = token.replace(/^\$/, '')
+      if (!candidate || /^[<\[]/.test(candidate)) {
+        continue
+      }
+
       return candidate
     }
   }

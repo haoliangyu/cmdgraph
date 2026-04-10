@@ -1,0 +1,14 @@
+Acme controls clusters.
+
+Usage:
+  acmectl [command]
+
+Available Commands:
+  get         Display one or many resources
+  apply       Apply a configuration to a resource
+
+Flags:
+  -h, --help              help for acmectl
+  --namespace string      If present, the namespace scope for this CLI request
+
+Use "acmectl [command] --help" for more information about a command.
