@@ -36,7 +36,8 @@ describe('integration: crawler + executor', () => {
         'generate',
         `node ${fixtureCli}`,
         '--max-depth=2',
-        '--format=both',
+        '--format=json',
+        '--format=md',
         `--output=${outDir}`,
       ])
 
@@ -54,6 +55,38 @@ describe('integration: crawler + executor', () => {
       expect(markdownContent).toContain('## node')
       expect(markdownContent).toContain('config')
       expect(markdownContent).toContain('user')
+    } finally {
+      await rm(outDir, { recursive: true, force: true })
+    }
+  })
+
+  it('deduplicates repeated format flags in the CLI', async () => {
+    const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
+    const outDir = await mkdtemp(resolve(tmpdir(), 'doclix-e2e-dedupe-'))
+
+    try {
+      const { stdout } = await execa('node', [
+        './dist/index.js',
+        'generate',
+        `node ${fixtureCli}`,
+        '--max-depth=1',
+        '--format=json',
+        '--format=json',
+        '--format=md',
+        '--format=md',
+        `--output=${outDir}`,
+      ])
+
+      const stem = toSafeFileStem(`node ${fixtureCli}`)
+      const jsonPath = resolve(outDir, `${stem}.json`)
+      const markdownPath = resolve(outDir, `${stem}.md`)
+
+      await expect(readFile(jsonPath, 'utf8')).resolves.toContain('"name": "fixture"')
+      await expect(readFile(markdownPath, 'utf8')).resolves.toContain('config')
+
+      const outputLines = stdout.split('\n')
+      expect(outputLines.filter((line) => line.includes(`${stem}.json`))).toHaveLength(1)
+      expect(outputLines.filter((line) => line.includes(`${stem}.md`))).toHaveLength(1)
     } finally {
       await rm(outDir, { recursive: true, force: true })
     }

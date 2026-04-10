@@ -8,7 +8,7 @@ The tool should:
 - Discover commands and subcommands recursively
 - Parse help output into structured data
 - Support multiple CLI frameworks via plugin parsers
-- Output both JSON (primary) and Markdown (secondary)
+- Output JSON (primary/default) and Markdown (secondary)
 - Be extensible, testable, and robust
 
 The CLI itself must be built using **oclif**.
@@ -60,7 +60,7 @@ doclix generate kubectl --max-depth=3 --output=./docs
 | Option        | Description                   |
 | ------------- | ----------------------------- |
 | `--max-depth` | Limit recursion depth         |
-| `--format`    | json, md, or both             |
+| `--format`    | repeatable json or md         |
 | `--output`    | Output directory              |
 | `--timeout`   | Per-command execution timeout |
 | `--parser`    | Force parser plugin           |

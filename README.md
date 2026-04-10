@@ -62,7 +62,7 @@ doclix generate <command> [options]
 Examples:
 
 ```bash
-doclix generate git --max-depth=2 --format=both --output=./docs
+doclix generate git --max-depth=2 --format=json --format=md --output=./docs
 doclix generate git --max-depth=3 --concurrency=4 --format=json --output=./docs
 doclix generate kubectl --max-depth=3 --timeout=8000 --format=json --output=./docs
 doclix generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --output=./docs
@@ -74,7 +74,7 @@ doclix generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --outpu
 | --- | --- | --- | --- |
 | `--max-depth` | integer | `2` | Maximum recursion depth for subcommands |
 | `--concurrency` | integer | `4` | Maximum number of help commands to run in parallel |
-| `--format` | `json \| md \| both` | `both` | Output format |
+| `--format` | repeatable `json \| md` | `json` | Output format; repeat the flag to write multiple outputs |
 | `--output` | string | `./docs` | Output directory |
 | `--timeout` | integer | `5000` | Per-command timeout in ms |
 | `--parser` | string | auto-detect | Force a parser plugin by name |
@@ -97,7 +97,7 @@ const generated = await generate('git', {
 	timeout: 5000,
 	concurrency: 4,
 	parser: 'heuristic',
-	format: 'both',
+	format: ['json', 'md'],
 })
 
 console.log(generated.json)
@@ -108,7 +108,7 @@ Library API notes:
 
 - `introspect(command, options)` returns `{ tree, warnings }`
 - `generate(command, options)` returns `{ tree, json?, markdown?, warnings }`
-- `options.format` supports `json`, `md`, or `both` (default)
+- `options.format` supports `json` or `md`; pass an array for multiple outputs, and omit it to default to JSON
 - `generate` options align with CLI flag names: `max-depth`, `timeout`, `concurrency`, `parser`, and `format`
 - advanced injection (`executor`, `parserRegistry`) is available for tests/custom integration
 
@@ -134,7 +134,7 @@ Parser selection behavior:
 
 ## Output
 
-For `doclix generate git --output=./docs`, you get:
+For `doclix generate git --format=json --format=md --output=./docs`, you get:
 
 - `docs/git.json`
 - `docs/git.md`

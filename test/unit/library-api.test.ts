@@ -32,7 +32,7 @@ describe('library API', () => {
 
     const generated = await generate('tool', {
       'max-depth': 0,
-      format: 'both',
+      format: ['json', 'md'],
       timeout: 1000,
       concurrency: 1,
       parser: 'heuristic',
@@ -43,5 +43,20 @@ describe('library API', () => {
     expect(generated.json).toContain('"name": "tool"')
     expect(generated.markdown).toContain('## tool')
     expect(generated.warnings).toEqual([])
+  })
+
+  it('defaults to JSON output when no format is provided', async () => {
+    const outputs = new Map<string, string>([['tool', 'Usage: tool [command]']])
+
+    const generated = await generate('tool', {
+      'max-depth': 0,
+      timeout: 1000,
+      concurrency: 1,
+      parser: 'heuristic',
+      executor: async (path) => outputs.get(path.join(' ')) ?? '',
+    })
+
+    expect(generated.json).toContain('"name": "tool"')
+    expect(generated.markdown).toBeUndefined()
   })
 })

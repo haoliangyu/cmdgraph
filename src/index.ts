@@ -2,12 +2,15 @@ import { execute } from '@oclif/core'
 import { pathToFileURL } from 'node:url'
 import { crawlCommandTree } from './core/crawler.js'
 import type { CrawlOptions } from './core/crawler.js'
+import { normalizeFormats } from './formatters/formats.js'
+import type { OutputFormat } from './formatters/formats.js'
 import { formatAsJson } from './formatters/json.js'
 import { formatAsMarkdown } from './formatters/markdown.js'
 import type { CommandNode } from './types.js'
 
 export type { CommandNode, ParsedCommand, Option } from './types.js'
 export type { CrawlOptions } from './core/crawler.js'
+export type { OutputFormat } from './formatters/formats.js'
 
 export interface GenerateOptions {
 	'max-depth'?: number
@@ -16,7 +19,7 @@ export interface GenerateOptions {
 	parser?: string
 	parserRegistry?: CrawlOptions['parserRegistry']
 	executor?: CrawlOptions['executor']
-	format?: 'json' | 'md' | 'both'
+	format?: OutputFormat | OutputFormat[]
 }
 
 export interface GeneratedDocumentation {
@@ -67,11 +70,11 @@ export async function generateDocumentation(
 		executor: options.executor,
 	})
 
-	const format = options.format ?? 'both'
+	const formats = normalizeFormats(options.format)
 	return {
 		tree,
-		json: format === 'json' || format === 'both' ? formatAsJson(tree) : undefined,
-		markdown: format === 'md' || format === 'both' ? formatAsMarkdown(tree) : undefined,
+		json: formats.includes('json') ? formatAsJson(tree) : undefined,
+		markdown: formats.includes('md') ? formatAsMarkdown(tree) : undefined,
 		warnings,
 	}
 }

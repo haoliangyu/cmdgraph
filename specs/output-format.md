@@ -143,7 +143,7 @@ Current behavior:
 
 - produced by `formatAsJson(root)`
 - implemented as pretty-printed `JSON.stringify(root, null, 2)`
-- written when CLI format is `json` or `both`
+- written when `json` is included in the selected output formats
 - returned by the library API when requested via `generate()`
 
 JSON responsibilities:
@@ -187,14 +187,15 @@ Markdown non-goals:
 Current CLI output options:
 
 ```ts
-type OutputFormat = 'json' | 'md' | 'both'
+type OutputFormat = 'json' | 'md'
 ```
 
 Behavior:
 
-- `json`: write only canonical JSON
-- `md`: write only Markdown
-- `both`: write JSON and Markdown
+- no `--format`: write canonical JSON only
+- `--format=json`: write only canonical JSON
+- `--format=md`: write only Markdown
+- repeated `--format` flags: write each selected output
 
 Implementation note:
 
@@ -220,6 +221,23 @@ Interpretation:
 - `json` is the serialized canonical output
 - `markdown` is a rendered view derived from the same tree
 - `warnings` report crawl/parser issues without changing output shape
+
+Current library format selection:
+
+```ts
+format?: OutputFormat | OutputFormat[]
+```
+
+Behavior:
+
+- omitted `format` defaults to `json`
+- a single value requests one renderer
+- an array requests multiple renderers
+
+Normalization rule:
+
+- format selection should be normalized through shared logic used by both the CLI and library surfaces
+- normalization must default to `json`, remove duplicates, and preserve the first-seen order of requested formats
 
 ## Required Output Pipeline
 
