@@ -21,16 +21,6 @@ export function isCliAvailable(command: string): boolean {
   return result.status === 0
 }
 
-export function firstAvailableCli(candidates: string[]): string | undefined {
-  for (const candidate of candidates) {
-    if (isCliAvailable(candidate)) {
-      return candidate
-    }
-  }
-
-  return undefined
-}
-
 function toSafeFileStem(command: string): string {
   return command.trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()
 }

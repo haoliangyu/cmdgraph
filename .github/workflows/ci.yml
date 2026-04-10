@@ -21,14 +21,28 @@ jobs:
           node-version: 24
           cache: npm
 
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
       - name: Install dependencies
         run: npm ci
 
       - name: Lint
         run: npm run lint
 
+      - name: Build
+        run: npm run build
+
       - name: Test
         run: npm test
+
+      - name: Install e2e dependencies
+        run: |
+          npm install -g jest
+          python -m pip install --upgrade pip
+          python -m pip install "fastapi[standard]"
 
       - name: Real CLI e2e tests
         run: npm run test:e2e
