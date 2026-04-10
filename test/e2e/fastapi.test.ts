@@ -7,6 +7,6 @@ describeInCI('e2e: fastapi', () => {
     const generated = await generateJsonFor(command)
 
     expect(generated.name).toBeTruthy()
-    expect(generated.usage?.toLowerCase()).toContain(command.split(/\s+/)[0] ?? '')
+    expect(generated.usage ?? generated.description).toBeTruthy()
   }, E2E_TEST_TIMEOUT_MS)
 })

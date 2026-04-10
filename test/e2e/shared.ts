@@ -15,6 +15,11 @@ export type GeneratedDoc = {
 export const describeInCI = describe
 export const E2E_TEST_TIMEOUT_MS = 15000
 
+type GenerateOptions = {
+  maxDepth?: number
+  timeoutMs?: number
+}
+
 export function isCliAvailable(command: string): boolean {
   const checker = process.platform === 'win32' ? 'where' : 'which'
   const result = spawnSync(checker, [command], { stdio: 'ignore' })
@@ -25,7 +30,8 @@ function toSafeFileStem(command: string): string {
   return command.trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()
 }
 
-export async function generateJsonFor(command: string): Promise<GeneratedDoc> {
+export async function generateJsonFor(command: string, options: GenerateOptions = {}): Promise<GeneratedDoc> {
+  const { maxDepth = 5, timeoutMs = 8000 } = options
   const outDir = await mkdtemp(resolve(tmpdir(), `doclix-real-${command}-`))
 
   try {
@@ -33,10 +39,10 @@ export async function generateJsonFor(command: string): Promise<GeneratedDoc> {
       './dist/index.js',
       'generate',
       command,
-      '--max-depth=5',
+      `--max-depth=${maxDepth}`,
       '--format=json',
       `--output=${outDir}`,
-      '--timeout=8000',
+      `--timeout=${timeoutMs}`,
     ])
 
     const jsonPath = resolve(outDir, `${toSafeFileStem(command)}.json`)
