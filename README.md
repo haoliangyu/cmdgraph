@@ -74,12 +74,31 @@ doclix generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --outpu
 | `--timeout` | integer | `5000` | Per-command timeout in ms |
 | `--parser` | string | auto-detect | Force a parser plugin by name |
 
+## Supported Parsers
+
+`doclix` uses a plugin-based parser registry. You can force one with `--parser`, or let `doclix` auto-detect.
+
+- `heuristic`: default and fallback parser; handles common help layouts (`Usage`, `Commands`, `Options`/`Flags`); recommended for most tools.
+- `oclif`: detection-oriented parser entry for oclif-style CLIs; currently delegates to the heuristic parser.
+- `cobra`: detection-oriented parser entry for cobra-style CLIs; currently delegates to the heuristic parser.
+
+Parser selection behavior:
+
+1. If `--parser` is provided, that parser is used.
+2. Otherwise, parser `detect()` methods are checked.
+3. If nothing matches, `heuristic` is used.
+
 ## Output
 
 For `doclix generate git --output=./docs`, you get:
 
 - `docs/git.json`
 - `docs/git.md`
+
+Why both formats:
+
+- JSON is agent-ready because it is structured, stable, and easy to index, diff, validate, and consume in automation pipelines.
+- Markdown is human-readable because it is hierarchy-first, scannable in docs/reviews, and works well in repos, wikis, and generated documentation sites.
 
 JSON shape:
 
@@ -97,28 +116,24 @@ JSON shape:
 }
 ```
 
-## Architecture
+Matching Markdown output:
 
-Execution flow:
+```md
+# Command Documentation
 
-1. `generate` command parses args/flags
-2. Executor runs `<command> --help`
-3. Parser registry selects parser (forced or detected)
-4. Crawler recursively discovers subcommands
-5. Formatter writes JSON and/or Markdown
+## git
+The stupid content tracker
 
-Key modules:
+**Usage:** `git [options] [command]`
 
-- `src/core/executor.ts`
-- `src/core/parser.ts`
-- `src/core/parser-registry.ts`
-- `src/core/crawler.ts`
-- `src/parsers/heuristic.ts`
-- `src/parsers/oclif.ts`
-- `src/parsers/cobra.ts`
-- `src/formatters/json.ts`
-- `src/formatters/markdown.ts`
-- `src/commands/generate.ts`
+**Options**
+- `-h, --help`: display help
+
+**Subcommands**
+- `add`
+- `commit`
+- `push`
+```
 
 ## Testing
 
