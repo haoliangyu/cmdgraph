@@ -27,6 +27,8 @@ Key files:
 - `src/parsers/thor.ts`: framework-specific parser plugin for Thor-style CLIs.
 - `src/parsers/picocli.ts`: framework-specific parser plugin for picocli-style Java CLIs.
 - `src/parsers/urfave-cli.ts`: framework-specific parser plugin for urfave/cli-style Go CLIs.
+- `src/parsers/system-commandline.ts`: framework-specific parser plugin for C# System.CommandLine CLIs.
+- `src/parsers/commandlineparser.ts`: framework-specific parser plugin for C# CommandLineParser CLIs.
 
 Registry behavior:
 
@@ -110,7 +112,7 @@ The heuristic parser currently uses a tolerant, section-based strategy:
 
 This strategy is intended to work across Git-style, Docker-style, Kubectl/Cobra-style, and similar outputs.
 
-Specialized parser plugins (for example oclif, cobra, thor, picocli, urfave-cli) may apply lightweight normalization before delegating to the heuristic parser so extraction remains stable while detection stays framework-aware.
+Specialized parser plugins (for example oclif, cobra, thor, picocli, urfave-cli, system-commandline, commandlineparser) may apply lightweight normalization before delegating to the heuristic parser so extraction remains stable while detection stays framework-aware.
 
 ## Examples
 
@@ -247,6 +249,52 @@ Expected parser behavior:
 - Parsed name resolves to `greet` from usage/name block.
 - Subcommands include `hello`, `help`.
 
+### Example G: System.CommandLine-style Commands (C#/.NET)
+
+Input snippet:
+
+```text
+Description:
+  A sample System.CommandLine app.
+
+Usage:
+  dotnet-scmd [command] [options]
+
+Options:
+  -?, -h, --help   Show help and usage information
+
+Commands:
+  hello <name>     Print greeting
+```
+
+Expected parser behavior:
+
+- Specialized `system-commandline` parser is selected.
+- Parsed name resolves to `dotnet-scmd` from usage.
+- Subcommands include `hello`.
+
+### Example H: CommandLineParser-style Commands (C#)
+
+Input snippet:
+
+```text
+USAGE: dotnet-clp [OPTIONS] [COMMAND]
+
+OPTIONS:
+  --help           Display this help screen.
+  --version        Display version information.
+
+COMMANDS:
+  convert          Convert input file
+  inspect          Inspect input file
+```
+
+Expected parser behavior:
+
+- Specialized `commandlineparser` parser is selected.
+- Parsed name resolves to `dotnet-clp` from usage.
+- Subcommands include `convert`, `inspect`.
+
 ## Testing Guidance
 
 When adding/updating parser behavior:
@@ -254,7 +302,7 @@ When adding/updating parser behavior:
 - Add unit fixtures under `test/unit/fixtures`.
 - Add assertions in `test/unit/heuristic-parser.test.ts` (or parser-specific tests).
 - Cover at least one positive case and one ambiguity/regression case.
-- Keep real CLI variance covered by CI-only e2e tests in `test/e2e` (for Thor support, include Bundler CLI where available and auto-skip when unavailable; for picocli support, include a Java CLI such as Gradle where available and auto-skip when unavailable; for urfave support, include a Go urfave/cli binary where available and auto-skip when unavailable).
+- Keep real CLI variance covered by CI-only e2e tests in `test/e2e` (for Thor support, include Bundler CLI where available and auto-skip when unavailable; for picocli support, include a Java CLI such as Gradle where available and auto-skip when unavailable; for urfave support, include a Go urfave/cli binary where available and auto-skip when unavailable; for C# support, include System.CommandLine and CommandLineParser binaries where available and auto-skip when unavailable).
 
 ## Extension Pattern for New Parsers
 

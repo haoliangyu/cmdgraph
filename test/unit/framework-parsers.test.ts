@@ -68,6 +68,26 @@ describe('framework parsers', () => {
     expect(parsed.subcommands).toEqual(['hello', 'help'])
   })
 
+  it('detects and parses System.CommandLine output', async () => {
+    const helpText = await fixture('system-commandline-help.txt')
+    const parser = createDefaultParserRegistry().select(helpText)
+    const parsed = parser.parse(helpText)
+
+    expect(parser.name).toBe('system-commandline')
+    expect(parsed.name).toBe('dotnet-scmd')
+    expect(parsed.subcommands).toEqual(['hello'])
+  })
+
+  it('detects and parses CommandLineParser output', async () => {
+    const helpText = await fixture('commandlineparser-help.txt')
+    const parser = createDefaultParserRegistry().select(helpText)
+    const parsed = parser.parse(helpText)
+
+    expect(parser.name).toBe('commandlineparser')
+    expect(parsed.name).toBe('dotnet-clp')
+    expect(parsed.subcommands).toEqual(['convert', 'inspect'])
+  })
+
   it('detects and parses Click output', async () => {
     const helpText = await fixture('click-help.txt')
     const parser = createDefaultParserRegistry().select(helpText)

@@ -1,0 +1,13 @@
+Description:
+  A sample System.CommandLine app.
+
+Usage:
+  dotnet-scmd [command] [options]
+
+Options:
+  --name <name>    Name to greet
+  --version        Show version information
+  -?, -h, --help   Show help and usage information
+
+Commands:
+  hello <name>     Print greeting

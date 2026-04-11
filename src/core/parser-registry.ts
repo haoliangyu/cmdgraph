@@ -1,5 +1,6 @@
 import type { CLIParser } from './parser.js'
 import { argparseParser } from '../parsers/argparse.js'
+import { commandLineParserParser } from '../parsers/commandlineparser.js'
 import { cobraParser } from '../parsers/cobra.js'
 import { clapParser } from '../parsers/clap.js'
 import { clickParser } from '../parsers/click.js'
@@ -7,6 +8,7 @@ import { commanderParser } from '../parsers/commander.js'
 import { heuristicParser } from '../parsers/heuristic.js'
 import { oclifParser } from '../parsers/oclif.js'
 import { picocliParser } from '../parsers/picocli.js'
+import { systemCommandLineParser } from '../parsers/system-commandline.js'
 import { thorParser } from '../parsers/thor.js'
 import { typerParser } from '../parsers/typer.js'
 import { urfaveCliParser } from '../parsers/urfave-cli.js'
@@ -70,6 +72,8 @@ export function createDefaultParserRegistry(): ParserRegistry {
     thorParser,
     picocliParser,
     urfaveCliParser,
+    systemCommandLineParser,
+    commandLineParserParser,
     typerParser,
     clickParser,
     clapParser,

@@ -47,6 +47,11 @@ jobs:
         with:
           go-version: '1.25'
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
       - name: Install dependencies
         run: npm ci
 
@@ -65,6 +70,56 @@ jobs:
           go install go.woodpecker-ci.org/woodpecker/v3/cmd/cli@latest
           mv "$(go env GOPATH)/bin/cli" "$(go env GOPATH)/bin/woodpecker-cli"
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+          dotnet_tmpdir="$(mktemp -d)"
+
+          dotnet new console -n dotnet-scmd -o "$dotnet_tmpdir/dotnet-scmd"
+          cat > "$dotnet_tmpdir/dotnet-scmd/Program.cs" <<'EOF'
+          using System.CommandLine;
+
+          var root = new RootCommand("Sample System.CommandLine app");
+          root.Subcommands.Add(new Command("hello", "Print greeting"));
+
+          return root.Parse(args).Invoke();
+          EOF
+
+          (
+            cd "$dotnet_tmpdir/dotnet-scmd"
+            dotnet add package System.CommandLine
+            dotnet publish -c Release -o out
+          )
+          sudo install "$dotnet_tmpdir/dotnet-scmd/out/dotnet-scmd" /usr/local/bin/dotnet-scmd
+
+          dotnet new console -n dotnet-clp -o "$dotnet_tmpdir/dotnet-clp"
+          cat > "$dotnet_tmpdir/dotnet-clp/Program.cs" <<'EOF'
+          using CommandLine;
+
+          public class Program
+          {
+            [Verb("convert", HelpText = "Convert input file")]
+            public class ConvertOptions { }
+
+            [Verb("inspect", HelpText = "Inspect input file")]
+            public class InspectOptions { }
+
+            public static int Main(string[] args)
+            {
+              return Parser.Default.ParseArguments<ConvertOptions, InspectOptions>(args)
+                .MapResult(
+                  (ConvertOptions _) => 0,
+                  (InspectOptions _) => 0,
+                  _ => 1
+                );
+            }
+          }
+          EOF
+
+          (
+            cd "$dotnet_tmpdir/dotnet-clp"
+            dotnet add package CommandLineParser
+            dotnet publish -c Release -o out
+          )
+          sudo install "$dotnet_tmpdir/dotnet-clp/out/dotnet-clp" /usr/local/bin/dotnet-clp
 
       - name: Real CLI e2e tests
         run: npm run test:e2e
