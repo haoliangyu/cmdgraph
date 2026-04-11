@@ -2,6 +2,7 @@
   "name": "cmdgraph",
   "version": "0.1.0",
   "description": "CLI documentation introspection tool for AI agents",
+  "homepage": "https://github.com/haoliangyu/cmdgraph",
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -12,7 +13,9 @@
   },
   "files": [
     "bin",
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=18"
@@ -35,9 +38,16 @@
   },
   "keywords": [
     "cli",
+    "command-line",
     "documentation",
     "introspection",
-    "oclif"
+    "command-discovery",
+    "help-parser",
+    "markdown",
+    "json",
+    "sitemap",
+    "llms-txt",
+    "typescript"
   ],
   "license": "MIT",
   "dependencies": {

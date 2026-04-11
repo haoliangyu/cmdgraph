@@ -36,26 +36,11 @@ Most CLIs are documented in unstructured terminal text. `cmdgraph` turns that in
 ## Requirements
 
 - Node.js `>=18`
-- npm
 
 ## Installation
 
 ```bash
-npm install
-npm run build
-```
-
-Run locally:
-
-```bash
-node ./dist/index.js generate git --max-depth=2 --output=./docs
-```
-
-Optional local binary link:
-
-```bash
-npm link
-cmdgraph generate kubectl --max-depth=3 --output=./docs
+npm install -g cmdgraph
 ```
 
 ## CLI Usage
