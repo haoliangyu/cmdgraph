@@ -21,17 +21,17 @@
     "doclix": "npm run build && node ./dist/index.js",
     "build": "tsc -p tsconfig.json",
     "build:docs": "npm run build && node ./dist/index.js generate \"node ./dist/index.js\" --format=html --format=llms-txt --format=sitemap --site-base-url=https://haoliangyu.github.io/doclix/ --root-command-name=doclix --output=./docs",
+    "build:docs:release": "npm run build && node ./dist/index.js generate \"node ./dist/index.js\" --format=json --root-command-name=doclix --output=./dist/agent-reference && node -e \"const fs = require('node:fs'); fs.copyFileSync('./dist/agent-reference/node-distindexjs.json', './dist/agent-reference/doclix.json')\"",
     "clean": "rm -rf dist coverage",
+    "prepare": "husky",
     "lint": "eslint .",
-    "format": "prettier --write .",
+    "lint:fix": "eslint . --fix",
     "test": "npm run build && vitest run --exclude test/e2e/**/*.test.ts",
     "test:watch": "vitest",
-    "prepare": "husky",
-    "lint:fix": "eslint . --fix",
     "test:unit": "vitest run test/unit",
     "test:integration": "vitest run test/integration",
     "test:e2e": "npm run build && vitest run test/e2e",
-    "prepublishOnly": "npm run build && npm version"
+    "prepublishOnly": "npm run clean && npm run build && npm run build:docs:release && npm version"
   },
   "keywords": [
     "cli",

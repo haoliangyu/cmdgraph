@@ -224,6 +224,23 @@ Discovery artifact characteristics:
 - `sitemap.xml` is generated separately and requires `--site-base-url` so it contains valid deployable URLs
 - HTML output does not implicitly generate either file; request them explicitly with `--format=llms-txt` and `--format=sitemap`
 
+## Agent Reference Guide (Packaged JSON)
+
+`npm run build:docs:release` now generates a JSON reference guide and places it inside the published package payload:
+
+- `dist/agent-reference/doclix.json` (stable path for agents)
+
+How to use it in an agent/tooling workflow:
+
+1. Install the package.
+2. Read `dist/agent-reference/doclix.json` from the installed package directory.
+3. Use the command tree, options, and examples as the source of truth when generating or validating `doclix` usage.
+
+Notes:
+
+- The file is generated from live introspection of the built CLI.
+- It is rebuilt on package release.
+
 ## Testing
 
 Run default tests (build + unit/integration):
