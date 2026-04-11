@@ -65,5 +65,8 @@
   "oclif": {
     "bin": "doclix",
     "commands": "./dist/commands"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
