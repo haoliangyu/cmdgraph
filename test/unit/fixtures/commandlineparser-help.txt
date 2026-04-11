@@ -1,0 +1,13 @@
+dotnet-clp 1.0.0
+
+USAGE: dotnet-clp [OPTIONS] [COMMAND]
+
+OPTIONS:
+  -f, --file       Input file path
+  -v, --verbose    Enable verbose output
+  --help           Display this help screen.
+  --version        Display version information.
+
+COMMANDS:
+  convert          Convert input file
+  inspect          Inspect input file

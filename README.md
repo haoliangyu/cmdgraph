@@ -22,7 +22,7 @@ Most CLIs are documented in unstructured terminal text. `cmdgraph` turns that in
 ## Features
 
 - Recursive command discovery from `--help`, `-h`, `-H`, or `help`
-- Plugin parser system (`heuristic`, `oclif`, `commander`, `yargs`, `cobra`, `thor`, `picocli`, `urfave-cli`, `click`, `typer`, `clap`, `argparse`)
+- Plugin parser system (`heuristic`, `oclif`, `commander`, `yargs`, `cobra`, `thor`, `picocli`, `urfave-cli`, `system-commandline`, `commandlineparser`, `click`, `typer`, `clap`, `argparse`)
 - Best-effort metadata extraction for arguments, examples, and aliases
 - Concurrency control for recursive help crawling
 - Automatic in-memory caching of help outputs within a process
@@ -130,6 +130,8 @@ Library API notes:
 - `thor`: parser for Thor-style CLIs (`Usage: ... COMMAND [ARGS]`, `Commands`/`Tasks` headings, e.g. Bundler CLI).
 - `picocli`: parser for picocli-style Java CLIs (`Show this help message and exit.`, `Print version information and exit.`, e.g. Gradle).
 - `urfave-cli`: parser for urfave/cli-style Go CLIs (`NAME`, `USAGE`, `COMMANDS`, `GLOBAL OPTIONS`).
+- `system-commandline`: parser for .NET System.CommandLine CLIs (`Usage:` heading blocks and `Show help and usage information`).
+- `commandlineparser`: parser for C# CommandLineParser CLIs (`USAGE:`, `OPTIONS:`, `Display this help screen.`, `Display version information.`).
 - `click`: parser for Click-style output (`[OPTIONS]`, `Show this message and exit`).
 - `typer`: parser for Typer-style output (Click-based plus completion flags and boxed sections).
 - `clap`: parser for clap-style output (`Print help`, `Print version`).
@@ -253,13 +255,13 @@ Current test coverage includes:
 
 - Executor behavior (success + timeout)
 - Heuristic parser with common and real-world fixtures (`git`, `docker`, `kubectl`, `gh` styles)
-- Framework parser detection and parsing fixtures (`oclif`, `commander`, `yargs`, `cobra`, `thor`, `picocli`, `urfave-cli`, `click`, `typer`, `clap`, `argparse`)
+- Framework parser detection and parsing fixtures (`oclif`, `commander`, `yargs`, `cobra`, `thor`, `picocli`, `urfave-cli`, `system-commandline`, `commandlineparser`, `click`, `typer`, `clap`, `argparse`)
 - Metadata extraction for aliases, arguments, and examples
 - Library API tests for programmatic introspection and formatted output generation
 - HTML formatter rendering and static site generation
 - Explicit `llms.txt` and `sitemap.xml` generation and validation
 - Integration crawling against a real fixture executable
-- End-to-end generation through built CLI, with auto-skip when target CLIs are unavailable (including Bundler/Thor-style, Gradle/picocli-style, and urfave/cli-style Go CLIs)
+- End-to-end generation through built CLI, with auto-skip when target CLIs are unavailable (including Bundler/Thor-style, Gradle/picocli-style, urfave/cli-style Go CLIs, and C# System.CommandLine/CommandLineParser CLIs)
 
 ## Development
 
