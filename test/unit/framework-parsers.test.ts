@@ -48,6 +48,16 @@ describe('framework parsers', () => {
     expect(parsed.subcommands).toEqual(['help', 'list'])
   })
 
+  it('detects and parses picocli output', async () => {
+    const helpText = await fixture('picocli-help.txt')
+    const parser = createDefaultParserRegistry().select(helpText)
+    const parsed = parser.parse(helpText)
+
+    expect(parser.name).toBe('picocli')
+    expect(parsed.name).toBe('acme')
+    expect(parsed.subcommands).toEqual(['init', 'deploy'])
+  })
+
   it('detects and parses Click output', async () => {
     const helpText = await fixture('click-help.txt')
     const parser = createDefaultParserRegistry().select(helpText)

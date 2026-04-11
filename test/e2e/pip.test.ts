@@ -1,9 +1,9 @@
 import { expect, it } from 'vitest'
 import { E2E_TEST_TIMEOUT_MS, describeInCI, isCliAvailable, generateJsonFor } from './shared.js'
 
-describeInCI('e2e: fastapi', () => {
-  it.skipIf(!isCliAvailable('fastapi'))('generates docs from a FastAPI CLI --help', async () => {
-    const command = 'fastapi'
+describeInCI('e2e: pip', () => {
+  it.skipIf(!isCliAvailable('pip'))('generates docs from pip --help', async () => {
+    const command = 'pip'
     const generated = await generateJsonFor(command)
 
     expect(generated.name).toBeTruthy()
