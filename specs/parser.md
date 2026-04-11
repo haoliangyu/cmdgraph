@@ -25,6 +25,7 @@ Key files:
 - `src/parsers/oclif.ts`: framework-specific parser plugin.
 - `src/parsers/cobra.ts`: framework-specific parser plugin.
 - `src/parsers/thor.ts`: framework-specific parser plugin for Thor-style CLIs.
+- `src/parsers/picocli.ts`: framework-specific parser plugin for picocli-style Java CLIs.
 
 Registry behavior:
 
@@ -108,7 +109,7 @@ The heuristic parser currently uses a tolerant, section-based strategy:
 
 This strategy is intended to work across Git-style, Docker-style, Kubectl/Cobra-style, and similar outputs.
 
-Specialized parser plugins (for example oclif, cobra, thor) may apply lightweight normalization before delegating to the heuristic parser so extraction remains stable while detection stays framework-aware.
+Specialized parser plugins (for example oclif, cobra, thor, picocli) may apply lightweight normalization before delegating to the heuristic parser so extraction remains stable while detection stays framework-aware.
 
 ## Examples
 
@@ -197,6 +198,28 @@ Expected parser behavior:
 - Parsed name resolves to `thor` (or the root command from usage).
 - Subcommands include `help`, `list`.
 
+### Example E: Picocli-style Commands (Java/picocli-like)
+
+Input snippet:
+
+```text
+Usage: acme [-hV] [COMMAND]
+
+Commands:
+  init      Initialize project
+  deploy    Deploy project
+
+Options:
+  -h, --help      Show this help message and exit.
+  -V, --version   Print version information and exit.
+```
+
+Expected parser behavior:
+
+- Specialized `picocli` parser is selected.
+- Parsed name resolves to `acme` from usage.
+- Subcommands include `init`, `deploy`.
+
 ## Testing Guidance
 
 When adding/updating parser behavior:
@@ -204,7 +227,7 @@ When adding/updating parser behavior:
 - Add unit fixtures under `test/unit/fixtures`.
 - Add assertions in `test/unit/heuristic-parser.test.ts` (or parser-specific tests).
 - Cover at least one positive case and one ambiguity/regression case.
-- Keep real CLI variance covered by CI-only e2e tests in `test/e2e` (for Thor support, include Rails CLI where available and auto-skip when unavailable).
+- Keep real CLI variance covered by CI-only e2e tests in `test/e2e` (for Thor support, include Rails CLI where available and auto-skip when unavailable; for picocli support, include a Java CLI such as Gradle where available and auto-skip when unavailable).
 
 ## Extension Pattern for New Parsers
 
