@@ -9,6 +9,7 @@ import { oclifParser } from '../parsers/oclif.js'
 import { picocliParser } from '../parsers/picocli.js'
 import { thorParser } from '../parsers/thor.js'
 import { typerParser } from '../parsers/typer.js'
+import { urfaveCliParser } from '../parsers/urfave-cli.js'
 import { yargsParser } from '../parsers/yargs.js'
 
 export class ParserRegistry {
@@ -68,6 +69,7 @@ export function createDefaultParserRegistry(): ParserRegistry {
     cobraParser,
     thorParser,
     picocliParser,
+    urfaveCliParser,
     typerParser,
     clickParser,
     clapParser,

@@ -1,0 +1,14 @@
+NAME:
+   greet - A new cli application
+
+USAGE:
+   greet [global options] command [command options]
+
+COMMANDS:
+   hello, hi   print a greeting
+   help, h     Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --lang value, -l value  language for the greeting (default: "en")
+   --help, -h              show help
+   --version, -v           print the version

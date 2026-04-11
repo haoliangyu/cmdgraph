@@ -58,6 +58,16 @@ describe('framework parsers', () => {
     expect(parsed.subcommands).toEqual(['init', 'deploy'])
   })
 
+  it('detects and parses urfave/cli output', async () => {
+    const helpText = await fixture('urfave-cli-help.txt')
+    const parser = createDefaultParserRegistry().select(helpText)
+    const parsed = parser.parse(helpText)
+
+    expect(parser.name).toBe('urfave-cli')
+    expect(parsed.name).toBe('greet')
+    expect(parsed.subcommands).toEqual(['hello', 'help'])
+  })
+
   it('detects and parses Click output', async () => {
     const helpText = await fixture('click-help.txt')
     const parser = createDefaultParserRegistry().select(helpText)
