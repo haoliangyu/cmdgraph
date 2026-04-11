@@ -38,6 +38,16 @@ describe('framework parsers', () => {
     expect(parsed.subcommands).toEqual(['get', 'apply'])
   })
 
+  it('detects and parses Thor output', async () => {
+    const helpText = await fixture('thor-help.txt')
+    const parser = createDefaultParserRegistry().select(helpText)
+    const parsed = parser.parse(helpText)
+
+    expect(parser.name).toBe('thor')
+    expect(parsed.name).toBe('thor')
+    expect(parsed.subcommands).toEqual(['help', 'list'])
+  })
+
   it('detects and parses Click output', async () => {
     const helpText = await fixture('click-help.txt')
     const parser = createDefaultParserRegistry().select(helpText)

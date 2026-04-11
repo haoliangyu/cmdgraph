@@ -22,8 +22,9 @@ Key files:
 - `src/core/parser.ts`: parser interface contract.
 - `src/core/parser-registry.ts`: parser registration/selection.
 - `src/parsers/heuristic.ts`: default tolerant parser.
-- `src/parsers/oclif.ts`: framework-specific parser placeholder.
-- `src/parsers/cobra.ts`: framework-specific parser placeholder.
+- `src/parsers/oclif.ts`: framework-specific parser plugin.
+- `src/parsers/cobra.ts`: framework-specific parser plugin.
+- `src/parsers/thor.ts`: framework-specific parser plugin for Thor-style CLIs.
 
 Registry behavior:
 
@@ -107,6 +108,8 @@ The heuristic parser currently uses a tolerant, section-based strategy:
 
 This strategy is intended to work across Git-style, Docker-style, Kubectl/Cobra-style, and similar outputs.
 
+Specialized parser plugins (for example oclif, cobra, thor) may apply lightweight normalization before delegating to the heuristic parser so extraction remains stable while detection stays framework-aware.
+
 ## Examples
 
 ### Example A: Generic CLI
@@ -175,6 +178,25 @@ Expected parser behavior:
 - Detect command sections in multiple heading variants.
 - Include both `repo` and `alias` in `subcommands`.
 
+### Example D: Thor-style Commands (Rails/Thor-like)
+
+Input snippet:
+
+```text
+Usage:
+  thor COMMAND [ARGS]
+
+Commands:
+  thor help [COMMAND]  # Describe available commands
+  thor list [SEARCH]   # Search commands
+```
+
+Expected parser behavior:
+
+- Specialized `thor` parser is selected.
+- Parsed name resolves to `thor` (or the root command from usage).
+- Subcommands include `help`, `list`.
+
 ## Testing Guidance
 
 When adding/updating parser behavior:
@@ -182,7 +204,7 @@ When adding/updating parser behavior:
 - Add unit fixtures under `test/unit/fixtures`.
 - Add assertions in `test/unit/heuristic-parser.test.ts` (or parser-specific tests).
 - Cover at least one positive case and one ambiguity/regression case.
-- Keep real CLI variance covered by CI-only e2e tests in `test/e2e`.
+- Keep real CLI variance covered by CI-only e2e tests in `test/e2e` (for Thor support, include Rails CLI where available and auto-skip when unavailable).
 
 ## Extension Pattern for New Parsers
 

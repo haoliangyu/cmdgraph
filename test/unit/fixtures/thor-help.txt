@@ -1,0 +1,12 @@
+Thor lets you create powerful command-line interfaces with Ruby.
+
+Usage:
+  thor COMMAND [ARGS]
+
+Commands:
+  thor help [COMMAND]  # Describe available commands or one specific command
+  thor list [SEARCH]   # Search commands
+
+Options:
+  [--version]          # Display version information
+  [--help]             # Display this help message
