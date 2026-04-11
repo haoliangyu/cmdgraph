@@ -45,7 +45,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.25'
 
       - name: Install dependencies
         run: npm ci
@@ -62,7 +62,8 @@ jobs:
       - name: Install e2e dependencies
         run: |
           npm install -g jest
-          go install github.com/woodpecker-ci/woodpecker/v3/cmd/woodpecker-cli@latest
+          go install go.woodpecker-ci.org/woodpecker/v3/cmd/cli@latest
+          mv "$(go env GOPATH)/bin/cli" "$(go env GOPATH)/bin/woodpecker-cli"
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Real CLI e2e tests
