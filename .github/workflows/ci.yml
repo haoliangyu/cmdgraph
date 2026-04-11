@@ -78,11 +78,9 @@ jobs:
           using System.CommandLine;
 
           var root = new RootCommand("Sample System.CommandLine app");
-          var hello = new Command("hello", "Print greeting");
-          hello.SetAction((string name) => Console.WriteLine($"hello {name}"), new Argument<string>("name"));
-          root.AddCommand(hello);
+          root.Subcommands.Add(new Command("hello", "Print greeting"));
 
-          return await root.Parse(args).InvokeAsync();
+          return root.Parse(args).Invoke();
           EOF
 
           (
