@@ -1,5 +1,5 @@
 {
-  "name": "doclix",
+  "name": "cmdgraph",
   "version": "0.1.0",
   "description": "CLI documentation introspection tool for AI agents",
   "type": "module",
@@ -8,7 +8,7 @@
     ".": "./dist/index.js"
   },
   "bin": {
-    "doclix": "bin/run.js"
+    "cmdgraph": "bin/run.js"
   },
   "files": [
     "bin",
@@ -18,10 +18,10 @@
     "node": ">=18"
   },
   "scripts": {
-    "doclix": "npm run build && node ./dist/index.js",
+    "cmdgraph": "npm run build && node ./dist/index.js",
     "build": "tsc -p tsconfig.json",
-    "build:docs": "npm run build && node ./dist/index.js generate \"node ./dist/index.js\" --format=html --format=llms-txt --format=sitemap --site-base-url=https://haoliangyu.github.io/doclix/ --root-command-name=doclix --output=./docs",
-    "build:docs:release": "npm run build && node ./dist/index.js generate \"node ./dist/index.js\" --format=json --root-command-name=doclix --output=./dist/agent-reference && node -e \"const fs = require('node:fs'); fs.copyFileSync('./dist/agent-reference/node-distindexjs.json', './dist/agent-reference/doclix.json')\"",
+    "build:docs": "npm run build && node ./dist/index.js generate \"node ./dist/index.js\" --format=html --format=llms-txt --format=sitemap --site-base-url=https://haoliangyu.github.io/cmdgraph/ --root-command-name=cmdgraph --output=./docs",
+    "build:docs:release": "npm run build && node ./dist/index.js generate \"node ./dist/index.js\" --format=json --root-command-name=cmdgraph --output=./dist/agent-reference && node -e \"const fs = require('node:fs'); fs.copyFileSync('./dist/agent-reference/node-distindexjs.json', './dist/agent-reference/cmdgraph.json')\"",
     "clean": "rm -rf dist coverage",
     "prepare": "husky",
     "lint": "eslint .",
@@ -64,7 +64,7 @@
     "vitest": "^2.1.8"
   },
   "oclif": {
-    "bin": "doclix",
+    "bin": "cmdgraph",
     "commands": "./dist/commands"
   },
   "publishConfig": {

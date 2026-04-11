@@ -1,8 +1,8 @@
-# doclix — CLI Documentation Introspection Tool
+# cmdgraph — CLI Documentation Introspection Tool
 
 ## Overview
 
-Build an npm CLI tool called **doclix** that recursively parses CLI tools (via `--help`) and generates structured documentation for AI agents.
+Build an npm CLI tool called **cmdgraph** that recursively parses CLI tools (via `--help`) and generates structured documentation for AI agents.
 
 The tool should:
 - Discover commands and subcommands recursively
@@ -46,13 +46,13 @@ The CLI itself must be built using **oclif**.
 ## CLI Usage
 
 ```bash
-doclix generate <command> [options]
+cmdgraph generate <command> [options]
 ````
 
 ### Example
 
 ```bash
-doclix generate kubectl --max-depth=3 --output=./docs
+cmdgraph generate kubectl --max-depth=3 --output=./docs
 ```
 
 ---
@@ -331,7 +331,7 @@ test/integration/fixtures/
 
 The generated project should include:
 
-* Working CLI (`doclix`)
+* Working CLI (`cmdgraph`)
 * Modular architecture
 * Plugin system scaffold
 * Recursive crawler
@@ -354,7 +354,7 @@ The generated project should include:
 * Running:
 
 ```bash
-doclix generate git --max-depth=2
+cmdgraph generate git --max-depth=2
 ```
 
 Produces:
@@ -382,7 +382,7 @@ Produces:
 ## How to use this
 
 1. Create empty repo
-2. Add this file as `doclix_BOOTSTRAP_SPEC.md`
+2. Add this file as `cmdgraph_BOOTSTRAP_SPEC.md`
 3. Open Copilot / Codex
 4. Prompt:
 

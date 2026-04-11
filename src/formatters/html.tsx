@@ -231,18 +231,18 @@ function HtmlDocument({ root }: { root: CommandNode }): React.JSX.Element {
 				<title>{title}</title>
 				<meta name="description" content={description} />
 				<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
-				<meta name="generator" content="doclix" />
+				<meta name="generator" content="cmdgraph" />
 				<meta name="color-scheme" content="light dark" />
 				<meta property="og:type" content="article" />
 				<meta property="og:title" content={title} />
 				<meta property="og:description" content={description} />
-				<meta property="og:site_name" content="doclix" />
+				<meta property="og:site_name" content="cmdgraph" />
 				<meta name="twitter:card" content="summary_large_image" />
 				<meta name="twitter:title" content={title} />
 				<meta name="twitter:description" content={description} />
 				<script src="https://cdn.tailwindcss.com?plugins=typography"></script>
 				<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: escapeJsonForScript(structuredData) }} />
-				<script type="application/json" id="doclix-search-index" dangerouslySetInnerHTML={{ __html: escapeJsonForScript(searchDocument) }} />
+				<script type="application/json" id="cmdgraph-search-index" dangerouslySetInnerHTML={{ __html: escapeJsonForScript(searchDocument) }} />
 				<script
 					dangerouslySetInnerHTML={{
 						__html: `tailwind.config = {
@@ -424,12 +424,12 @@ body {
 						<div className="mx-auto max-w-7xl px-6 py-4 text-center text-sm text-muted-foreground lg:px-8">
 							Created with{' '}
 							<a
-								href="https://github.com/haoliangyu/doclix"
+								href="https://github.com/haoliangyu/cmdgraph"
 								target="_blank"
 								rel="noopener noreferrer"
 								className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
 							>
-								doclix
+								cmdgraph
 							</a>
 						</div>
 					</footer>
@@ -438,14 +438,14 @@ body {
 					dangerouslySetInnerHTML={{
 						__html: `(function () {
   const root = document.documentElement;
-  const storageKey = 'doclix-theme';
+  const storageKey = 'cmdgraph-theme';
   const toggle = document.getElementById('theme-toggle');
   const label = document.getElementById('theme-toggle-label');
 	const searchInput = document.getElementById('command-search');
 	const searchStatus = document.getElementById('command-search-status');
 	const navItems = Array.from(document.querySelectorAll('[data-command-nav-item="true"]'));
 	const sections = Array.from(document.querySelectorAll('section[id][aria-labelledby]'));
-	const searchIndexNode = document.getElementById('doclix-search-index');
+	const searchIndexNode = document.getElementById('cmdgraph-search-index');
 	const searchIndex = searchIndexNode ? JSON.parse(searchIndexNode.textContent || '{}') : { entries: [], commandCount: 0 };
 
   function getPreferredTheme() {

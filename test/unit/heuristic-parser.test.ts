@@ -96,7 +96,7 @@ Examples:
 
   it('does not treat required positional arguments as subcommands', () => {
     const parsed = heuristicParser.parse(`USAGE
-  $ doclix generate COMMAND [flags]
+  $ cmdgraph generate COMMAND [flags]
 
 ARGUMENTS
   COMMAND  Root command to introspect, e.g. git or kubectl

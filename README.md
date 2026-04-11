@@ -1,16 +1,16 @@
-# doclix
+# cmdgraph
 
-[![CI](https://github.com/haoliangyu/doclix/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/haoliangyu/doclix/actions/workflows/ci.yml)
+[![CI](https://github.com/haoliangyu/cmdgraph/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/haoliangyu/cmdgraph/actions/workflows/ci.yml)
 [![Node.js >=18](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Recursive CLI documentation introspection for humans and AI agents.
 
-`doclix` runs CLI help commands (`--help`, `-h`, `-H`, or `help`), discovers subcommands recursively, parses the output into structured data, and exports documentation as JSON, Markdown, static HTML, `llms.txt`, and `sitemap.xml`.
+`cmdgraph` runs CLI help commands (`--help`, `-h`, `-H`, or `help`), discovers subcommands recursively, parses the output into structured data, and exports documentation as JSON, Markdown, static HTML, `llms.txt`, and `sitemap.xml`.
 
-## Why doclix?
+## Why cmdgraph?
 
-Most CLIs are documented in unstructured terminal text. `doclix` turns that into:
+Most CLIs are documented in unstructured terminal text. `cmdgraph` turns that into:
 
 - Machine-friendly JSON for indexing, retrieval, and agent pipelines
 - Human-readable Markdown for generated docs and internal references
@@ -55,24 +55,24 @@ Optional local binary link:
 
 ```bash
 npm link
-doclix generate kubectl --max-depth=3 --output=./docs
+cmdgraph generate kubectl --max-depth=3 --output=./docs
 ```
 
 ## CLI Usage
 
 ```bash
-doclix generate <command> [options]
+cmdgraph generate <command> [options]
 ```
 
 Examples:
 
 ```bash
-doclix generate git --max-depth=2 --format=json --format=md --output=./docs
-doclix generate git --max-depth=2 --format=html --output=./site
-doclix generate git --max-depth=2 --format=html --format=llms-txt --format=sitemap --site-base-url=https://docs.example.com/git/ --root-command-name=doclix --output=./site
-doclix generate git --max-depth=3 --concurrency=4 --format=json --output=./docs
-doclix generate kubectl --max-depth=3 --timeout=8000 --format=json --output=./docs
-doclix generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --output=./docs
+cmdgraph generate git --max-depth=2 --format=json --format=md --output=./docs
+cmdgraph generate git --max-depth=2 --format=html --output=./site
+cmdgraph generate git --max-depth=2 --format=html --format=llms-txt --format=sitemap --site-base-url=https://docs.example.com/git/ --root-command-name=cmdgraph --output=./site
+cmdgraph generate git --max-depth=3 --concurrency=4 --format=json --output=./docs
+cmdgraph generate kubectl --max-depth=3 --timeout=8000 --format=json --output=./docs
+cmdgraph generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --output=./docs
 ```
 
 ### Crawler options
@@ -95,10 +95,10 @@ doclix generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --outpu
 
 ## Library Usage
 
-`doclix` can also be used as a library:
+`cmdgraph` can also be used as a library:
 
 ```ts
-import { generate, introspect } from 'doclix'
+import { generate, introspect } from 'cmdgraph'
 
 const { tree, warnings } = await introspect('git', {
 	maxDepth: 2,
@@ -111,7 +111,7 @@ const generated = await generate('git', {
 	timeout: 5000,
 	concurrency: 4,
 	parser: 'heuristic',
-	rootCommandName: 'doclix',
+	rootCommandName: 'cmdgraph',
 	siteBaseUrl: 'https://docs.example.com/git/',
 	format: ['json', 'md', 'html', 'llms-txt', 'sitemap'],
 })
@@ -135,7 +135,7 @@ Library API notes:
 
 ## Supported Parsers
 
-`doclix` uses a plugin-based parser registry. You can force one with `--parser`, or let `doclix` auto-detect.
+`cmdgraph` uses a plugin-based parser registry. You can force one with `--parser`, or let `cmdgraph` auto-detect.
 
 - `heuristic`: default and fallback parser; handles common help layouts (`Usage`, `Commands`, `Options`/`Flags`); recommended for most tools.
 - `oclif`: parser for oclif-style CLIs (supports uppercase section blocks such as `USAGE`, `COMMANDS`, `FLAGS`).
@@ -155,7 +155,7 @@ Parser selection behavior:
 
 ## Output
 
-For `doclix generate git --format=json --format=md --format=html --format=llms-txt --format=sitemap --site-base-url=https://docs.example.com/git/ --output=./docs`, you get:
+For `cmdgraph generate git --format=json --format=md --format=html --format=llms-txt --format=sitemap --site-base-url=https://docs.example.com/git/ --output=./docs`, you get:
 
 - `docs/git.json`
 - `docs/git.md`
@@ -228,13 +228,13 @@ Discovery artifact characteristics:
 
 `npm run build:docs:release` now generates a JSON reference guide and places it inside the published package payload:
 
-- `dist/agent-reference/doclix.json` (stable path for agents)
+- `dist/agent-reference/cmdgraph.json` (stable path for agents)
 
 How to use it in an agent/tooling workflow:
 
 1. Install the package.
-2. Read `dist/agent-reference/doclix.json` from the installed package directory.
-3. Use the command tree, options, and examples as the source of truth when generating or validating `doclix` usage.
+2. Read `dist/agent-reference/cmdgraph.json` from the installed package directory.
+3. Use the command tree, options, and examples as the source of truth when generating or validating `cmdgraph` usage.
 
 Notes:
 

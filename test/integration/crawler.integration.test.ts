@@ -28,7 +28,7 @@ describe('integration: crawler + executor', () => {
 
   it('generates docs end-to-end through the built CLI', async () => {
     const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
-    const outDir = await mkdtemp(resolve(tmpdir(), 'doclix-e2e-'))
+    const outDir = await mkdtemp(resolve(tmpdir(), 'cmdgraph-e2e-'))
 
     try {
       await execa('node', [
@@ -62,7 +62,7 @@ describe('integration: crawler + executor', () => {
 
   it('deduplicates repeated format flags in the CLI', async () => {
     const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
-    const outDir = await mkdtemp(resolve(tmpdir(), 'doclix-e2e-dedupe-'))
+    const outDir = await mkdtemp(resolve(tmpdir(), 'cmdgraph-e2e-dedupe-'))
 
     try {
       const { stdout } = await execa('node', [
@@ -94,7 +94,7 @@ describe('integration: crawler + executor', () => {
 
   it('writes a static html site as index.html', async () => {
     const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
-    const outDir = await mkdtemp(resolve(tmpdir(), 'doclix-e2e-html-'))
+    const outDir = await mkdtemp(resolve(tmpdir(), 'cmdgraph-e2e-html-'))
 
     try {
       await execa('node', [
@@ -114,7 +114,7 @@ describe('integration: crawler + executor', () => {
       expect(htmlContent).toContain('id="theme-toggle"')
       expect(htmlContent).toContain('id="command-search"')
       expect(htmlContent).toContain('application/ld+json')
-      expect(htmlContent).toContain('doclix-search-index')
+      expect(htmlContent).toContain('cmdgraph-search-index')
       expect(htmlContent).toContain('config')
       expect(htmlContent).toContain('user')
     } finally {
@@ -124,7 +124,7 @@ describe('integration: crawler + executor', () => {
 
   it('writes explicit llms.txt and sitemap.xml discovery artifacts', async () => {
     const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
-    const outDir = await mkdtemp(resolve(tmpdir(), 'doclix-e2e-discovery-'))
+    const outDir = await mkdtemp(resolve(tmpdir(), 'cmdgraph-e2e-discovery-'))
 
     try {
       await execa('node', [
@@ -153,7 +153,7 @@ describe('integration: crawler + executor', () => {
 
   it('fails if sitemap is requested without a site base url', async () => {
     const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
-    const outDir = await mkdtemp(resolve(tmpdir(), 'doclix-e2e-sitemap-error-'))
+    const outDir = await mkdtemp(resolve(tmpdir(), 'cmdgraph-e2e-sitemap-error-'))
 
     try {
       await expect(

@@ -81,23 +81,23 @@ describe('library API', () => {
 
   it('supports overriding the displayed root command name across outputs', async () => {
     const outputs = new Map<string, string>([
-      ['node ./dist/index.js', 'Usage: doclix [command]'],
-      ['node ./dist/index.js generate', 'Usage: doclix generate COMMAND'],
+      ['node ./dist/index.js', 'Usage: cmdgraph [command]'],
+      ['node ./dist/index.js generate', 'Usage: cmdgraph generate COMMAND'],
     ])
 
     const generated = await generate('node ./dist/index.js', {
       'max-depth': 1,
       format: ['json', 'md', 'html'],
-      rootCommandName: 'doclix',
+      rootCommandName: 'cmdgraph',
       timeout: 1000,
       concurrency: 1,
       parser: 'heuristic',
       executor: async (path) => outputs.get(path.join(' ')) ?? '',
     })
 
-    expect(generated.tree.path).toEqual(['doclix'])
-    expect(generated.json).toContain('"path": [\n    "doclix"')
-    expect(generated.markdown).toContain('## doclix')
-    expect(generated.html).toContain('<title>doclix CLI Documentation</title>')
+    expect(generated.tree.path).toEqual(['cmdgraph'])
+    expect(generated.json).toContain('"path": [\n    "cmdgraph"')
+    expect(generated.markdown).toContain('## cmdgraph')
+    expect(generated.html).toContain('<title>cmdgraph CLI Documentation</title>')
   })
 })

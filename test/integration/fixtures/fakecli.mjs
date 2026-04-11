@@ -3,7 +3,7 @@
 const args = process.argv.slice(2)
 
 function printRootHelp() {
-  console.log(`doclix-fixture CLI
+  console.log(`cmdgraph-fixture CLI
 
 Usage:
   fixture [command]

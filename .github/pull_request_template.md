@@ -4,7 +4,7 @@ Describe what this PR changes and why.
 
 ## CI Status
 
-[![CI](https://github.com/haoliangyu/doclix/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/haoliangyu/doclix/actions/workflows/ci.yml)
+[![CI](https://github.com/haoliangyu/cmdgraph/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/haoliangyu/cmdgraph/actions/workflows/ci.yml)
 
 ## Checklist
 

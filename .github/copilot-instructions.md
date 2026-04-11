@@ -1,4 +1,4 @@
-# Copilot Conventions for doclix
+# Copilot Conventions for cmdgraph
 
 This repository is a TypeScript CLI tool that recursively introspects command help output and generates docs in multiple formats.
 

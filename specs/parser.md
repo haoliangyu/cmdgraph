@@ -1,6 +1,6 @@
 # Parser Implementation Guide
 
-Purpose: provide a concise reference for future agents implementing or extending CLI output parsers in doclix.
+Purpose: provide a concise reference for future agents implementing or extending CLI output parsers in cmdgraph.
 
 ## Scope
 
@@ -10,7 +10,7 @@ It is focused on the parser subsystem only (not executor/crawler/formatter inter
 
 ## Architecture Summary
 
-Parser flow in doclix:
+Parser flow in cmdgraph:
 
 1. Executor runs `<command> --help` and returns text.
 2. `ParserRegistry` selects parser (forced name, detect, fallback).

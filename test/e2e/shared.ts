@@ -32,7 +32,7 @@ function toSafeFileStem(command: string): string {
 
 export async function generateJsonFor(command: string, options: GenerateOptions = {}): Promise<GeneratedDoc> {
   const { maxDepth = 5, timeoutMs = 8000 } = options
-  const outDir = await mkdtemp(resolve(tmpdir(), `doclix-real-${command}-`))
+  const outDir = await mkdtemp(resolve(tmpdir(), `cmdgraph-real-${command}-`))
 
   try {
     await execa('node', [

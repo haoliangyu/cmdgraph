@@ -1,6 +1,6 @@
 # Output Format Specification
 
-Purpose: define the output architecture, contracts, and implementation requirements for all serialized formats in doclix.
+Purpose: define the output architecture, contracts, and implementation requirements for all serialized formats in cmdgraph.
 
 This spec establishes a strict pipeline:
 
