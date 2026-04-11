@@ -6,6 +6,7 @@ import { clickParser } from '../parsers/click.js'
 import { commanderParser } from '../parsers/commander.js'
 import { heuristicParser } from '../parsers/heuristic.js'
 import { oclifParser } from '../parsers/oclif.js'
+import { thorParser } from '../parsers/thor.js'
 import { typerParser } from '../parsers/typer.js'
 import { yargsParser } from '../parsers/yargs.js'
 
@@ -64,6 +65,7 @@ export function createDefaultParserRegistry(): ParserRegistry {
     commanderParser,
     yargsParser,
     cobraParser,
+    thorParser,
     typerParser,
     clickParser,
     clapParser,

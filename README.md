@@ -22,7 +22,7 @@ Most CLIs are documented in unstructured terminal text. `cmdgraph` turns that in
 ## Features
 
 - Recursive command discovery from `--help`, `-h`, `-H`, or `help`
-- Plugin parser system (`heuristic`, `oclif`, `commander`, `yargs`, `cobra`, `click`, `typer`, `clap`, `argparse`)
+- Plugin parser system (`heuristic`, `oclif`, `commander`, `yargs`, `cobra`, `thor`, `click`, `typer`, `clap`, `argparse`)
 - Best-effort metadata extraction for arguments, examples, and aliases
 - Concurrency control for recursive help crawling
 - Automatic in-memory caching of help outputs within a process
@@ -127,6 +127,7 @@ Library API notes:
 - `commander`: parser for Commander.js-style output (`display help for command`, `output the version number`).
 - `yargs`: parser for yargs-style output (`Show help`, `Show version number`, type hints like `[boolean]`).
 - `cobra`: parser for Cobra-style CLIs (`Available Commands`, `Flags`, `Global Flags`).
+- `thor`: parser for Thor-style CLIs (`Usage: ... COMMAND [ARGS]`, `Commands`/`Tasks` headings, e.g. Rails CLI).
 - `click`: parser for Click-style output (`[OPTIONS]`, `Show this message and exit`).
 - `typer`: parser for Typer-style output (Click-based plus completion flags and boxed sections).
 - `clap`: parser for clap-style output (`Print help`, `Print version`).
@@ -250,13 +251,13 @@ Current test coverage includes:
 
 - Executor behavior (success + timeout)
 - Heuristic parser with common and real-world fixtures (`git`, `docker`, `kubectl`, `gh` styles)
-- Framework parser detection and parsing fixtures (`oclif`, `commander`, `yargs`, `cobra`, `click`, `typer`, `clap`, `argparse`)
+- Framework parser detection and parsing fixtures (`oclif`, `commander`, `yargs`, `cobra`, `thor`, `click`, `typer`, `clap`, `argparse`)
 - Metadata extraction for aliases, arguments, and examples
 - Library API tests for programmatic introspection and formatted output generation
 - HTML formatter rendering and static site generation
 - Explicit `llms.txt` and `sitemap.xml` generation and validation
 - Integration crawling against a real fixture executable
-- End-to-end generation through built CLI, with auto-skip when target CLIs are unavailable
+- End-to-end generation through built CLI, with auto-skip when target CLIs are unavailable (including Rails/Thor-style CLIs)
 
 ## Development
 
