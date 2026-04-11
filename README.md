@@ -127,7 +127,7 @@ Library API notes:
 - `commander`: parser for Commander.js-style output (`display help for command`, `output the version number`).
 - `yargs`: parser for yargs-style output (`Show help`, `Show version number`, type hints like `[boolean]`).
 - `cobra`: parser for Cobra-style CLIs (`Available Commands`, `Flags`, `Global Flags`).
-- `thor`: parser for Thor-style CLIs (`Usage: ... COMMAND [ARGS]`, `Commands`/`Tasks` headings, e.g. Rails CLI).
+- `thor`: parser for Thor-style CLIs (`Usage: ... COMMAND [ARGS]`, `Commands`/`Tasks` headings, e.g. Bundler CLI).
 - `picocli`: parser for picocli-style Java CLIs (`Show this help message and exit.`, `Print version information and exit.`, e.g. Gradle).
 - `click`: parser for Click-style output (`[OPTIONS]`, `Show this message and exit`).
 - `typer`: parser for Typer-style output (Click-based plus completion flags and boxed sections).
@@ -258,7 +258,7 @@ Current test coverage includes:
 - HTML formatter rendering and static site generation
 - Explicit `llms.txt` and `sitemap.xml` generation and validation
 - Integration crawling against a real fixture executable
-- End-to-end generation through built CLI, with auto-skip when target CLIs are unavailable (including Rails/Thor-style and Gradle/picocli-style CLIs)
+- End-to-end generation through built CLI, with auto-skip when target CLIs are unavailable (including Bundler/Thor-style and Gradle/picocli-style CLIs)
 
 ## Development
 

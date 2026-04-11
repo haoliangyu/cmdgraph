@@ -179,7 +179,7 @@ Expected parser behavior:
 - Detect command sections in multiple heading variants.
 - Include both `repo` and `alias` in `subcommands`.
 
-### Example D: Thor-style Commands (Rails/Thor-like)
+### Example D: Thor-style Commands (Bundler/Thor-like)
 
 Input snippet:
 
@@ -227,7 +227,7 @@ When adding/updating parser behavior:
 - Add unit fixtures under `test/unit/fixtures`.
 - Add assertions in `test/unit/heuristic-parser.test.ts` (or parser-specific tests).
 - Cover at least one positive case and one ambiguity/regression case.
-- Keep real CLI variance covered by CI-only e2e tests in `test/e2e` (for Thor support, include Rails CLI where available and auto-skip when unavailable; for picocli support, include a Java CLI such as Gradle where available and auto-skip when unavailable).
+- Keep real CLI variance covered by CI-only e2e tests in `test/e2e` (for Thor support, include Bundler CLI where available and auto-skip when unavailable; for picocli support, include a Java CLI such as Gradle where available and auto-skip when unavailable).
 
 ## Extension Pattern for New Parsers
 
