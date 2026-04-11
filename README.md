@@ -69,23 +69,29 @@ Examples:
 ```bash
 doclix generate git --max-depth=2 --format=json --format=md --output=./docs
 doclix generate git --max-depth=2 --format=html --output=./site
-doclix generate git --max-depth=2 --format=llms-txt --format=sitemap --site-base-url=https://docs.example.com/git/ --output=./site
+doclix generate git --max-depth=2 --format=html --format=llms-txt --format=sitemap --site-base-url=https://docs.example.com/git/ --root-command-name=doclix --output=./site
 doclix generate git --max-depth=3 --concurrency=4 --format=json --output=./docs
 doclix generate kubectl --max-depth=3 --timeout=8000 --format=json --output=./docs
 doclix generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --output=./docs
 ```
 
-### Options
+### Crawler options
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
 | `--max-depth` | integer | `2` | Maximum recursion depth for subcommands |
 | `--concurrency` | integer | `4` | Maximum number of help commands to run in parallel |
+| `--timeout` | integer | `5000` | Per-command timeout in ms |
+| `--parser` | string | auto-detect | Force a parser plugin by name |
+
+### Output options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
 | `--format` | repeatable `json \| md \| html \| llms-txt \| sitemap` | `json` | Output format; repeat the flag to write multiple outputs |
 | `--output` | string | `./docs` | Output directory |
-| `--timeout` | integer | `5000` | Per-command timeout in ms |
 | `--site-base-url` | string | unset | Base URL used to generate discovery artifacts such as `llms.txt` links and `sitemap.xml` |
-| `--parser` | string | auto-detect | Force a parser plugin by name |
+| `--root-command-name` | string | unset | Override the displayed root command name in generated outputs |
 
 ## Library Usage
 
@@ -105,6 +111,7 @@ const generated = await generate('git', {
 	timeout: 5000,
 	concurrency: 4,
 	parser: 'heuristic',
+	rootCommandName: 'doclix',
 	siteBaseUrl: 'https://docs.example.com/git/',
 	format: ['json', 'md', 'html', 'llms-txt', 'sitemap'],
 })
@@ -122,7 +129,8 @@ Library API notes:
 - `generate(command, options)` returns `{ tree, json?, markdown?, html?, llmsTxt?, sitemap?, warnings }`
 - `options.format` supports `json`, `md`, `html`, `llms-txt`, and `sitemap`; pass an array for multiple outputs, and omit it to default to JSON
 - `options.siteBaseUrl` is required for `sitemap` and is recommended for `llms-txt`
-- `generate` options align with CLI flag names: `max-depth`, `timeout`, `concurrency`, `parser`, `format`, and `siteBaseUrl`
+- `options.rootCommandName` overrides the displayed root command name in generated outputs
+- `generate` options align with CLI flag names: `max-depth`, `timeout`, `concurrency`, `parser`, `format`, `siteBaseUrl`, and `rootCommandName`
 - advanced injection (`executor`, `parserRegistry`) is available for tests/custom integration
 
 ## Supported Parsers

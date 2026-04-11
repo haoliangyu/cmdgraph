@@ -32,35 +32,43 @@ export default class GenerateCommand extends Command {
       description: 'Limit recursion depth',
       min: 0,
       default: 2,
+      helpGroup: 'Crawler options',
     }),
     format: Flags.string({
       description: 'Output format; repeat the flag to write multiple outputs',
       options: ['json', 'md', 'html', 'llms-txt', 'sitemap'],
       multiple: true,
       default: ['json'],
+      helpGroup: 'Output options',
     }),
     'site-base-url': Flags.string({
       description: 'Base site URL used for discovery artifacts such as sitemap and llms.txt links',
+      helpGroup: 'Output options',
     }),
     output: Flags.string({
       description: 'Output directory',
       default: './docs',
+      helpGroup: 'Output options',
     }),
     timeout: Flags.integer({
       description: 'Per-command execution timeout in milliseconds',
       min: 100,
       default: 5000,
+      helpGroup: 'Crawler options',
     }),
     concurrency: Flags.integer({
       description: 'Maximum number of help commands to run in parallel',
       min: 1,
       default: 4,
+      helpGroup: 'Crawler options',
     }),
     parser: Flags.string({
       description: 'Force parser plugin name',
+      helpGroup: 'Crawler options',
     }),
     'root-command-name': Flags.string({
       description: 'Override displayed root command name in generated outputs',
+      helpGroup: 'Output options',
     }),
   }
 

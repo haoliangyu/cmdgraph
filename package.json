@@ -18,6 +18,7 @@
     "node": ">=18"
   },
   "scripts": {
+    "doclix": "npm run build && node ./dist/index.js",
     "build": "tsc -p tsconfig.json",
     "build:docs": "npm run build && node ./dist/index.js generate \"node ./dist/index.js\" --format=html --format=llms-txt --format=sitemap --site-base-url=https://haoliangyu.github.io/doclix/ --root-command-name=doclix --output=./docs",
     "clean": "rm -rf dist coverage",
