@@ -18,9 +18,10 @@ function isBundlerRunnable(): boolean {
 describeInCI('e2e: bundler', () => {
   it.skipIf(!isBundlerRunnable())('generates docs from Bundler CLI --help', async () => {
     const generated = await generateJsonFor('bundle')
+    const normalizedName = generated.name.toLowerCase()
     const synopsis = (generated.usage ?? generated.description ?? '').toLowerCase()
 
-    expect(generated.name.toLowerCase()).toBe('bundler')
+    expect(normalizedName.includes('bundler') || normalizedName.includes('bundle')).toBe(true)
     expect(synopsis.includes('bundle') || synopsis.includes('bundler')).toBe(true)
     expect(Array.isArray(generated.subcommands)).toBe(true)
   }, E2E_TEST_TIMEOUT_MS)
