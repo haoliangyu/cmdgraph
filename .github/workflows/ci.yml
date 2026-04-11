@@ -94,18 +94,24 @@ jobs:
           cat > "$dotnet_tmpdir/dotnet-clp/Program.cs" <<'EOF'
           using CommandLine;
 
-          [Verb("convert", HelpText = "Convert input file")]
-          class ConvertOptions { }
+          public class Program
+          {
+            [Verb("convert", HelpText = "Convert input file")]
+            public class ConvertOptions { }
 
-          [Verb("inspect", HelpText = "Inspect input file")]
-          class InspectOptions { }
+            [Verb("inspect", HelpText = "Inspect input file")]
+            public class InspectOptions { }
 
-          return Parser.Default.ParseArguments<ConvertOptions, InspectOptions>(args)
-            .MapResult(
-              (ConvertOptions _) => 0,
-              (InspectOptions _) => 0,
-              _ => 1
-            );
+            public static int Main(string[] args)
+            {
+              return Parser.Default.ParseArguments<ConvertOptions, InspectOptions>(args)
+                .MapResult(
+                  (ConvertOptions _) => 0,
+                  (InspectOptions _) => 0,
+                  _ => 1
+                );
+            }
+          }
           EOF
 
           (
