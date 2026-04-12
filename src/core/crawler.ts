@@ -5,7 +5,7 @@ import type { CommandNode, ParsedCommand } from '../types.js'
 
 export interface CrawlOptions {
   concurrency?: number
-  maxDepth: number
+  maxDepth?: number
   timeoutMs: number
   parserName?: string
   parserRegistry?: ParserRegistry
@@ -78,7 +78,7 @@ export async function crawlCommandTree(rootCommand: string, options: CrawlOption
       children: [],
     }
 
-    if (depth >= maxDepth) {
+    if (maxDepth !== undefined && depth >= maxDepth) {
       return node
     }
 

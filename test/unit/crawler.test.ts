@@ -72,6 +72,49 @@ describe('crawlCommandTree', () => {
     expect(tree.children[0].children).toHaveLength(0)
   })
 
+  it('crawls until leaf nodes when max depth is unset', async () => {
+    const outputs = new Map<string, string>([
+      [
+        'tool',
+        [
+          'Usage: tool [command]',
+          '',
+          'Commands:',
+          '  alpha    Alpha command',
+        ].join('\n'),
+      ],
+      [
+        'tool alpha',
+        [
+          'Usage: tool alpha [command]',
+          '',
+          'Commands:',
+          '  beta    Beta command',
+        ].join('\n'),
+      ],
+      [
+        'tool alpha beta',
+        [
+          'Usage: tool alpha beta [command]',
+          '',
+          'Commands:',
+          '  gamma    Gamma command',
+        ].join('\n'),
+      ],
+      ['tool alpha beta gamma', 'Usage: tool alpha beta gamma'],
+    ])
+
+    const tree = await crawlCommandTree('tool', {
+      timeoutMs: 1000,
+      executor: async (path) => outputs.get(path.join(' ')) ?? '',
+    })
+
+    const alpha = tree.children[0]
+    const beta = alpha.children[0]
+    expect(beta.path).toEqual(['tool', 'alpha', 'beta'])
+    expect(beta.children[0].path).toEqual(['tool', 'alpha', 'beta', 'gamma'])
+  })
+
   it('falls back to command token when parser returns unknown name', async () => {
     const tree = await crawlCommandTree('gh', {
       maxDepth: 1,

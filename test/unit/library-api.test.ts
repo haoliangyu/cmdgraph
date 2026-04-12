@@ -27,6 +27,39 @@ describe('library API', () => {
     expect(result.warnings).toEqual([])
   })
 
+  it('introspects until leaves when maxDepth is omitted', async () => {
+    const outputs = new Map<string, string>([
+      [
+        'tool',
+        [
+          'Usage: tool [command]',
+          '',
+          'Commands:',
+          '  alpha    Alpha command',
+        ].join('\n'),
+      ],
+      [
+        'tool alpha',
+        [
+          'Usage: tool alpha [command]',
+          '',
+          'Commands:',
+          '  beta    Beta command',
+        ].join('\n'),
+      ],
+      ['tool alpha beta', 'Usage: tool alpha beta'],
+    ])
+
+    const result = await introspect('tool', {
+      timeoutMs: 1000,
+      executor: async (path) => outputs.get(path.join(' ')) ?? '',
+    })
+
+    expect(result.tree.children[0].path.join(' ')).toBe('tool alpha')
+    expect(result.tree.children[0].children[0].path.join(' ')).toBe('tool alpha beta')
+    expect(result.warnings).toEqual([])
+  })
+
   it('generates all explicitly requested output formats in library mode', async () => {
     const outputs = new Map<string, string>([['tool', 'Usage: tool [command]']])
 

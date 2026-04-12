@@ -48,7 +48,7 @@ export async function introspect(
 	const warnings: string[] = []
 	const tree = await crawlCommandTree(command, {
 		...options,
-		maxDepth: options.maxDepth ?? 2,
+		maxDepth: options.maxDepth,
 		timeoutMs: options.timeoutMs ?? 5000,
 		onWarning: (message) => warnings.push(message),
 	})
