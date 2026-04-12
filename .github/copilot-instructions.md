@@ -75,3 +75,4 @@ npm run test:e2e
 - Do not rewrite large files when a minimal patch is sufficient.
 - Keep public CLI option names and defaults stable unless explicitly asked to change them.
 - Call out any unavoidable breaking changes clearly in summaries.
+- Update CHANGELOG.md with a clear description of the change and its impact on users.

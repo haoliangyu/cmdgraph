@@ -52,9 +52,9 @@ cmdgraph generate <command> [options]
 Examples:
 
 ```bash
-cmdgraph generate git --max-depth=2 --format=json --format=md --output=./docs
-cmdgraph generate git --max-depth=2 --format=html --output=./site
-cmdgraph generate git --max-depth=2 --format=html --format=llms-txt --format=sitemap --site-base-url=https://docs.example.com/git/ --root-command-name=cmdgraph --output=./site
+cmdgraph generate git --format=json --format=md --output=./docs
+cmdgraph generate git --format=html --output=./site
+cmdgraph generate git --format=html --format=llms-txt --format=sitemap --site-base-url=https://docs.example.com/git/ --root-command-name=cmdgraph --output=./site
 cmdgraph generate git --max-depth=3 --concurrency=4 --format=json --output=./docs
 cmdgraph generate kubectl --max-depth=3 --timeout=8000 --format=json --output=./docs
 cmdgraph generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --output=./docs
@@ -64,7 +64,7 @@ cmdgraph generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --out
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `--max-depth` | integer | `2` | Maximum recursion depth for subcommands |
+| `--max-depth` | integer | unset | Maximum recursion depth for subcommands (when unset, crawl continues until leaf commands) |
 | `--concurrency` | integer | `4` | Maximum number of help commands to run in parallel |
 | `--timeout` | integer | `5000` | Per-command timeout in ms |
 | `--parser` | string | auto-detect | Force a parser plugin by name |
@@ -86,13 +86,11 @@ cmdgraph generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --out
 import { generate, introspect } from 'cmdgraph'
 
 const { tree, warnings } = await introspect('git', {
-	maxDepth: 2,
 	timeoutMs: 5000,
 	concurrency: 4,
 })
 
 const generated = await generate('git', {
-	'max-depth': 2,
 	timeout: 5000,
 	concurrency: 4,
 	parser: 'heuristic',
@@ -112,6 +110,7 @@ Library API notes:
 
 - `introspect(command, options)` returns `{ tree, warnings }`
 - `generate(command, options)` returns `{ tree, json?, markdown?, html?, llmsTxt?, sitemap?, warnings }`
+- omit `maxDepth`/`max-depth` to recurse until leaf commands; set it explicitly to cap traversal depth
 - `options.format` supports `json`, `md`, `html`, `llms-txt`, and `sitemap`; pass an array for multiple outputs, and omit it to default to JSON
 - `options.siteBaseUrl` is required for `sitemap` and is recommended for `llms-txt`
 - `options.rootCommandName` overrides the displayed root command name in generated outputs

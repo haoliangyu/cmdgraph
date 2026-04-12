@@ -18,7 +18,7 @@ function toSafeFileStem(command: string): string {
 export default class GenerateCommand extends Command {
   static override description = 'Recursively introspect a CLI via --help and generate documentation'
 
-  static override examples = ['<%= config.bin %> <%= command.id %> kubectl --max-depth=3 --output=./docs']
+  static override examples = ['<%= config.bin %> <%= command.id %> kubectl --output=./docs']
 
   static override args = {
     command: Args.string({
@@ -31,7 +31,6 @@ export default class GenerateCommand extends Command {
     'max-depth': Flags.integer({
       description: 'Limit recursion depth',
       min: 0,
-      default: 2,
       helpGroup: 'Crawler options',
     }),
     format: Flags.string({
