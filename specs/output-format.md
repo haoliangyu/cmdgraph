@@ -195,7 +195,7 @@ Current behavior:
 - produced by `formatAsHtml(root, options?)`
 - renders a static single-page `index.html`
 - uses a React server-rendered template
-- supports optional output-scoped customizations for title and README section rendered from a markdown file
+- supports optional output-scoped customizations for title, project link, and README section rendered from a markdown file
 - uses Tailwind CSS and shadcn/ui-inspired component patterns
 - defaults to a modern light-green theme and includes a dark mode toggle
 - includes semantic landmarks, skip navigation, and accessible interactive controls
@@ -302,6 +302,7 @@ Current library format selection:
 format?: OutputFormat | OutputFormat[]
 'output-root-command-name'?: string
 'output-html-title'?: string
+'output-html-project-link'?: string
 'output-html-readme'?: string // path to a .md file
 'output-llms-txt-base-url'?: string
 'output-sitemap-base-url'?: string

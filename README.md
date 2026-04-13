@@ -54,7 +54,7 @@ Examples:
 ```bash
 cmdgraph generate git --format=json --format=md --output=./docs
 cmdgraph generate git --format=html --output=./site
-cmdgraph generate git --format=html --output-html-title="Git CLI Docs" --output-html-readme=README.md --output=./site
+cmdgraph generate git --format=html --output-html-title="Git CLI Docs" --output-html-project-link=https://github.com/acme/git-cli --output-html-readme=README.md --output=./site
 cmdgraph generate git --format=html --format=llms-txt --format=sitemap --output-root-command-name=cmdgraph --output-llms-txt-base-url=https://docs.example.com/git/ --output-sitemap-base-url=https://docs.example.com/git/ --output=./site
 cmdgraph generate git --max-depth=3 --concurrency=4 --format=json --output=./docs
 cmdgraph generate kubectl --max-depth=3 --timeout=8000 --format=json --output=./docs
@@ -78,6 +78,7 @@ cmdgraph generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --out
 | `--output` | string | `./docs` | Output directory |
 | `--output-root-command-name` | string |  | Override the displayed root command name in generated outputs |
 | `--output-html-title` | string |  | Set HTML page title |
+| `--output-html-project-link` | string |  | Project URL shown in the HTML footer |
 | `--output-html-readme` | string |  | Path to a `.md` file rendered as a README section in the HTML page |
 | `--output-llms-txt-base-url` | string |  | Base URL used to generate `llms.txt` links |
 | `--output-sitemap-base-url` | string |  | Base URL used to generate `sitemap.xml` links (required for sitemap output) |
@@ -100,6 +101,7 @@ const generated = await generate('git', {
 	parser: 'heuristic',
 	'output-root-command-name': 'cmdgraph',
 	'output-html-title': 'Git CLI Documentation',
+	'output-html-project-link': 'https://github.com/haoliangyu/cmdgraph',
 	'output-html-readme': './README.md',
 	'output-llms-txt-base-url': 'https://docs.example.com/git/',
 	'output-sitemap-base-url': 'https://docs.example.com/git/',
@@ -121,9 +123,10 @@ Library API notes:
 - `options.format` supports `json`, `md`, `html`, `llms-txt`, and `sitemap`; pass an array for multiple outputs, and omit it to default to JSON
 - `options.output-root-command-name` overrides the displayed root command name in generated outputs
 - `options.output-html-title` customizes the HTML page title
+- `options.output-html-project-link` adds a project URL link to the HTML footer
 - `options.output-html-readme` points to a `.md` file to render as a README section in HTML output
 - `options.output-sitemap-base-url` is required for `sitemap`; `options.output-llms-txt-base-url` controls `llms.txt` links
-- `generate` options align with CLI flag names: `max-depth`, `timeout`, `concurrency`, `parser`, `format`, `output-root-command-name`, `output-html-title`, `output-html-readme`, `output-llms-txt-base-url`, and `output-sitemap-base-url`
+- `generate` options align with CLI flag names: `max-depth`, `timeout`, `concurrency`, `parser`, `format`, `output-root-command-name`, `output-html-title`, `output-html-project-link`, `output-html-readme`, `output-llms-txt-base-url`, and `output-sitemap-base-url`
 - advanced injection (`executor`, `parserRegistry`) is available for tests/custom integration
 
 ## Supported Parsers

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Library APIs no longer apply an implicit `maxDepth` fallback when omitted.
 - Renamed output-scoped options to `--output-{format}-{short-name}` naming.
 - Added `--output-html-title` to customize generated HTML page titles.
+- Added `--output-html-project-link` to show a project link in generated HTML footers.
 - Added `--output-html-readme` to load a `.md` file and render it as a README section in generated HTML pages.
 
 ## [0.2.0] - 2026-04-10

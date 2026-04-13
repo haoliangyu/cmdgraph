@@ -25,6 +25,7 @@ export interface GenerateOptions {
 	parser?: string
 	'output-root-command-name'?: string
 	'output-html-title'?: string
+	'output-html-project-link'?: string
 	'output-html-readme'?: string
 	'output-llms-txt-base-url'?: string
 	'output-sitemap-base-url'?: string
@@ -108,6 +109,7 @@ export async function generateDocumentation(
 		html: formats.includes('html')
 			? formatAsHtml(outputTree, {
 				title: options['output-html-title'],
+				projectLink: options['output-html-project-link'],
 				readme: htmlReadmeMarkdown,
 			})
 			: undefined,

@@ -106,6 +106,7 @@ describe('integration: crawler + executor', () => {
         `node ${fixtureCli}`,
         '--max-depth=2',
         '--format=html',
+        '--output-html-project-link=https://example.com/fakecli',
         `--output-html-readme=${readmePath}`,
         `--output=${outDir}`,
       ])
@@ -119,6 +120,7 @@ describe('integration: crawler + executor', () => {
       expect(htmlContent).toContain('id="command-search"')
       expect(htmlContent).toContain('application/ld+json')
       expect(htmlContent).toContain('cmdgraph-search-index')
+      expect(htmlContent).toContain('href="https://example.com/fakecli"')
       expect(htmlContent).toContain('<h1>Fixture README</h1>')
       expect(htmlContent).toContain('Generated for integration testing.')
       expect(htmlContent).toContain('config')

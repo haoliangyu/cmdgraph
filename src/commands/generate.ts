@@ -69,6 +69,10 @@ export default class GenerateCommand extends Command {
       description: 'Custom HTML page title',
       helpGroup: 'Output options (html)',
     }),
+    'output-html-project-link': Flags.string({
+      description: 'Project URL shown in the HTML footer',
+      helpGroup: 'Output options (html)',
+    }),
     'output-html-readme': Flags.string({
       description: 'Path to a .md file rendered as a README section in the HTML page',
       helpGroup: 'Output options (html)',
@@ -141,6 +145,7 @@ export default class GenerateCommand extends Command {
         htmlPath,
         formatAsHtml(outputTree, {
           title: flags['output-html-title'],
+          projectLink: flags['output-html-project-link'],
           readme: htmlReadmeMarkdown,
         }),
         'utf8',

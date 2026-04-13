@@ -150,6 +150,7 @@ describe('library API', () => {
         'max-depth': 0,
         format: ['html'],
         'output-html-title': 'Custom Tool Docs',
+        'output-html-project-link': 'https://example.com/repo',
         'output-html-readme': readmePath,
         timeout: 1000,
         concurrency: 1,
@@ -158,6 +159,7 @@ describe('library API', () => {
       })
 
       expect(generated.html).toContain('<title>Custom Tool Docs</title>')
+      expect(generated.html).toContain('href="https://example.com/repo"')
       expect(generated.html).toContain('<h1>Generated</h1>')
       expect(generated.html).toContain('This page is generated from CLI help output.')
       expect(generated.warnings).toEqual([])

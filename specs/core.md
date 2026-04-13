@@ -67,6 +67,7 @@ cmdgraph generate kubectl --max-depth=3 --output=./docs
 | `--timeout`   | Per-command execution timeout |
 | `--output-root-command-name` | Override displayed root command name in generated outputs |
 | `--output-html-title` | Set HTML page title |
+| `--output-html-project-link` | Project URL shown in the generated HTML footer |
 | `--output-html-readme` | Path to a `.md` file rendered as a README section in generated HTML |
 | `--output-llms-txt-base-url` | Base URL for `llms.txt` discovery links |
 | `--output-sitemap-base-url` | Base URL for `sitemap.xml` links (required for sitemap output) |
