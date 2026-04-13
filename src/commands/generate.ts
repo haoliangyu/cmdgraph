@@ -1,5 +1,5 @@
 import { Args, Command, Flags } from '@oclif/core'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { crawlCommandTree } from '../core/crawler.js'
 import { withRootCommandName } from '../core/root-command-name.js'
@@ -38,16 +38,12 @@ export default class GenerateCommand extends Command {
       options: ['json', 'md', 'html', 'llms-txt', 'sitemap'],
       multiple: true,
       default: ['json'],
-      helpGroup: 'Output options',
-    }),
-    'site-base-url': Flags.string({
-      description: 'Base site URL used for discovery artifacts such as sitemap and llms.txt links',
-      helpGroup: 'Output options',
+      helpGroup: 'Output options (general)',
     }),
     output: Flags.string({
       description: 'Output directory',
       default: './docs',
-      helpGroup: 'Output options',
+      helpGroup: 'Output options (general)',
     }),
     timeout: Flags.integer({
       description: 'Per-command execution timeout in milliseconds',
@@ -65,9 +61,29 @@ export default class GenerateCommand extends Command {
       description: 'Force parser plugin name',
       helpGroup: 'Crawler options',
     }),
-    'root-command-name': Flags.string({
+    'output-root-command-name': Flags.string({
       description: 'Override displayed root command name in generated outputs',
-      helpGroup: 'Output options',
+      helpGroup: 'Output options (general)',
+    }),
+    'output-html-title': Flags.string({
+      description: 'Custom HTML page title',
+      helpGroup: 'Output options (html)',
+    }),
+    'output-html-project-link': Flags.string({
+      description: 'Project URL shown in the HTML footer',
+      helpGroup: 'Output options (html)',
+    }),
+    'output-html-readme': Flags.string({
+      description: 'Path to a .md file rendered as a README section in the HTML page',
+      helpGroup: 'Output options (html)',
+    }),
+    'output-llms-txt-base-url': Flags.string({
+      description: 'Base site URL used for llms.txt links',
+      helpGroup: 'Output options (llms-txt)',
+    }),
+    'output-sitemap-base-url': Flags.string({
+      description: 'Base site URL used for sitemap.xml links',
+      helpGroup: 'Output options (sitemap)',
     }),
   }
 
@@ -75,8 +91,8 @@ export default class GenerateCommand extends Command {
     const { args, flags } = await this.parse(GenerateCommand)
 
     const formats = normalizeFormats(flags.format as OutputFormat[] | undefined)
-  	if (formats.includes('sitemap') && !flags['site-base-url']) {
-  		this.error('--site-base-url is required when using --format=sitemap')
+    if (formats.includes('sitemap') && !flags['output-sitemap-base-url']) {
+      this.error('--output-sitemap-base-url is required when using --format=sitemap')
   	}
 
     const outputDir = resolve(flags.output)
@@ -92,7 +108,22 @@ export default class GenerateCommand extends Command {
       onWarning: (message) => warnings.push(message),
     })
 
-    const outputTree = withRootCommandName(tree, flags['root-command-name'])
+    const outputTree = withRootCommandName(tree, flags['output-root-command-name'])
+    let htmlReadmeMarkdown: string | undefined
+
+    if (flags['output-html-readme']) {
+      const readmePath = flags['output-html-readme'].trim()
+      if (!readmePath.toLowerCase().endsWith('.md')) {
+        this.error('--output-html-readme must point to a .md file')
+      }
+
+      try {
+        htmlReadmeMarkdown = await readFile(resolve(readmePath), 'utf8')
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        this.error(`Failed to read --output-html-readme file: ${message}`)
+      }
+    }
 
     const stem = toSafeFileStem(args.command)
 
@@ -110,19 +141,27 @@ export default class GenerateCommand extends Command {
 
     if (formats.includes('html')) {
       const htmlPath = resolve(outputDir, 'index.html')
-      await writeFile(htmlPath, formatAsHtml(outputTree), 'utf8')
+      await writeFile(
+        htmlPath,
+        formatAsHtml(outputTree, {
+          title: flags['output-html-title'],
+          projectLink: flags['output-html-project-link'],
+          readme: htmlReadmeMarkdown,
+        }),
+        'utf8',
+      )
       this.log(`Wrote ${htmlPath}`)
     }
 
     if (formats.includes('llms-txt')) {
       const llmsTxtPath = resolve(outputDir, 'llms.txt')
-      await writeFile(llmsTxtPath, formatAsLlmsTxt(outputTree, { siteBaseUrl: flags['site-base-url'] }), 'utf8')
+      await writeFile(llmsTxtPath, formatAsLlmsTxt(outputTree, { siteBaseUrl: flags['output-llms-txt-base-url'] }), 'utf8')
       this.log(`Wrote ${llmsTxtPath}`)
     }
 
     if (formats.includes('sitemap')) {
       const sitemapPath = resolve(outputDir, 'sitemap.xml')
-      await writeFile(sitemapPath, formatAsSitemap(outputTree, { siteBaseUrl: flags['site-base-url'] as string }), 'utf8')
+      await writeFile(sitemapPath, formatAsSitemap(outputTree, { siteBaseUrl: flags['output-sitemap-base-url'] as string }), 'utf8')
       this.log(`Wrote ${sitemapPath}`)
     }
 

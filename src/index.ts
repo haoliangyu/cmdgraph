@@ -1,4 +1,6 @@
 import { execute } from '@oclif/core'
+import { readFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { crawlCommandTree } from './core/crawler.js'
 import type { CrawlOptions } from './core/crawler.js'
@@ -21,11 +23,15 @@ export interface GenerateOptions {
 	concurrency?: number
 	timeout?: number
 	parser?: string
-	siteBaseUrl?: string
+	'output-root-command-name'?: string
+	'output-html-title'?: string
+	'output-html-project-link'?: string
+	'output-html-readme'?: string
+	'output-llms-txt-base-url'?: string
+	'output-sitemap-base-url'?: string
 	parserRegistry?: CrawlOptions['parserRegistry']
 	executor?: CrawlOptions['executor']
 	format?: OutputFormat | OutputFormat[]
-	rootCommandName?: string
 }
 
 export interface GeneratedDocumentation {
@@ -80,19 +86,39 @@ export async function generateDocumentation(
 	})
 
 	const formats = normalizeFormats(options.format)
-	if (formats.includes('sitemap') && !options.siteBaseUrl) {
-		throw new Error('siteBaseUrl is required when generating sitemap output')
+	if (formats.includes('sitemap') && !options['output-sitemap-base-url']) {
+		throw new Error('output-sitemap-base-url is required when generating sitemap output')
 	}
 
-	const outputTree = withRootCommandName(tree, options.rootCommandName)
+	let htmlReadmeMarkdown: string | undefined
+	if (options['output-html-readme']) {
+		const readmePath = options['output-html-readme'].trim()
+		if (!readmePath.toLowerCase().endsWith('.md')) {
+			throw new Error('output-html-readme must point to a .md file')
+		}
+
+		htmlReadmeMarkdown = await readFile(resolve(readmePath), 'utf8')
+	}
+
+	const outputTree = withRootCommandName(tree, options['output-root-command-name'])
 
 	return {
 		tree: outputTree,
 		json: formats.includes('json') ? formatAsJson(outputTree) : undefined,
 		markdown: formats.includes('md') ? formatAsMarkdown(outputTree) : undefined,
-		html: formats.includes('html') ? formatAsHtml(outputTree) : undefined,
-		llmsTxt: formats.includes('llms-txt') ? formatAsLlmsTxt(outputTree, { siteBaseUrl: options.siteBaseUrl }) : undefined,
-		sitemap: formats.includes('sitemap') ? formatAsSitemap(outputTree, { siteBaseUrl: options.siteBaseUrl as string }) : undefined,
+		html: formats.includes('html')
+			? formatAsHtml(outputTree, {
+				title: options['output-html-title'],
+				projectLink: options['output-html-project-link'],
+				readme: htmlReadmeMarkdown,
+			})
+			: undefined,
+		llmsTxt: formats.includes('llms-txt')
+			? formatAsLlmsTxt(outputTree, { siteBaseUrl: options['output-llms-txt-base-url'] })
+			: undefined,
+		sitemap: formats.includes('sitemap')
+			? formatAsSitemap(outputTree, { siteBaseUrl: options['output-sitemap-base-url'] as string })
+			: undefined,
 		warnings,
 	}
 }

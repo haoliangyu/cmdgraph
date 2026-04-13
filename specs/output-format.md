@@ -192,9 +192,10 @@ Status: current secondary format for static-site publishing.
 
 Current behavior:
 
-- produced by `formatAsHtml(root)`
+- produced by `formatAsHtml(root, options?)`
 - renders a static single-page `index.html`
 - uses a React server-rendered template
+- supports optional output-scoped customizations for title, project link, and README section rendered from a markdown file
 - uses Tailwind CSS and shadcn/ui-inspired component patterns
 - defaults to a modern light-green theme and includes a dark mode toggle
 - includes semantic landmarks, skip navigation, and accessible interactive controls
@@ -223,7 +224,7 @@ Current behavior:
 - produced by `formatAsLlmsTxt(root, options)`
 - renders a compact text summary of the hosted docs and command inventory
 - can use relative `index.html` links by default
-- can use absolute URLs when `siteBaseUrl` is provided
+- can use absolute URLs when `output-llms-txt-base-url` is provided
 
 llms.txt responsibilities:
 
@@ -239,7 +240,7 @@ Current behavior:
 
 - produced by `formatAsSitemap(root, { siteBaseUrl })`
 - renders a sitemap pointing at the hosted `index.html`
-- requires `siteBaseUrl` because sitemap output must contain deployable site URLs
+- requires `output-sitemap-base-url` because sitemap output must contain deployable site URLs
 
 sitemap responsibilities:
 
@@ -264,7 +265,7 @@ Behavior:
 - `--format=md`: write only Markdown
 - `--format=html`: write only static HTML
 - `--format=llms-txt`: write only `llms.txt`
-- `--format=sitemap`: write only `sitemap.xml` and require `siteBaseUrl`
+- `--format=sitemap`: write only `sitemap.xml` and require `--output-sitemap-base-url`
 - repeated `--format` flags: write each selected output
 
 Implementation note:
@@ -299,7 +300,12 @@ Current library format selection:
 
 ```ts
 format?: OutputFormat | OutputFormat[]
-siteBaseUrl?: string
+'output-root-command-name'?: string
+'output-html-title'?: string
+'output-html-project-link'?: string
+'output-html-readme'?: string // path to a .md file
+'output-llms-txt-base-url'?: string
+'output-sitemap-base-url'?: string
 ```
 
 Behavior:
@@ -307,7 +313,8 @@ Behavior:
 - omitted `format` defaults to `json`
 - a single value requests one renderer
 - an array requests multiple renderers
-- `siteBaseUrl` is required for sitemap output and recommended for llms.txt when generating deployable discovery links
+- `output-sitemap-base-url` is required for sitemap output
+- `output-llms-txt-base-url` is optional and controls absolute URL generation for llms.txt
 
 Normalization rule:
 

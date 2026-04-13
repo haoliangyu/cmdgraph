@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -95,14 +95,19 @@ describe('integration: crawler + executor', () => {
   it('writes a static html site as index.html', async () => {
     const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
     const outDir = await mkdtemp(resolve(tmpdir(), 'cmdgraph-e2e-html-'))
+    const readmePath = resolve(outDir, 'README.md')
 
     try {
+      await writeFile(readmePath, '# Fixture README\n\nGenerated for integration testing.', 'utf8')
+
       await execa('node', [
         './dist/index.js',
         'generate',
         `node ${fixtureCli}`,
         '--max-depth=2',
         '--format=html',
+        '--output-html-project-link=https://example.com/fakecli',
+        `--output-html-readme=${readmePath}`,
         `--output=${outDir}`,
       ])
 
@@ -115,6 +120,9 @@ describe('integration: crawler + executor', () => {
       expect(htmlContent).toContain('id="command-search"')
       expect(htmlContent).toContain('application/ld+json')
       expect(htmlContent).toContain('cmdgraph-search-index')
+      expect(htmlContent).toContain('href="https://example.com/fakecli"')
+      expect(htmlContent).toContain('<h1>Fixture README</h1>')
+      expect(htmlContent).toContain('Generated for integration testing.')
       expect(htmlContent).toContain('config')
       expect(htmlContent).toContain('user')
     } finally {
@@ -134,7 +142,8 @@ describe('integration: crawler + executor', () => {
         '--max-depth=2',
         '--format=llms-txt',
         '--format=sitemap',
-        '--site-base-url=https://docs.example.com/fakecli/',
+        '--output-llms-txt-base-url=https://docs.example.com/fakecli/',
+        '--output-sitemap-base-url=https://docs.example.com/fakecli/',
         `--output=${outDir}`,
       ])
 
@@ -166,7 +175,7 @@ describe('integration: crawler + executor', () => {
           `--output=${outDir}`,
         ]),
       ).rejects.toMatchObject({
-        stderr: expect.stringContaining('--site-base-url is required when using --format=sitemap'),
+        stderr: expect.stringContaining('--output-sitemap-base-url'),
       })
     } finally {
       await rm(outDir, { recursive: true, force: true })
