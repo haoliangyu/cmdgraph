@@ -1,6 +1,6 @@
 {
   "name": "cmdgraph",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "CLI documentation introspection tool for AI agents",
   "homepage": "https://github.com/haoliangyu/cmdgraph",
   "type": "module",
@@ -34,7 +34,7 @@
     "test:unit": "vitest run test/unit",
     "test:integration": "vitest run test/integration",
     "test:e2e": "npm run build && vitest run test/e2e",
-    "prepublishOnly": "npm run clean && npm run build && npm run build:docs:release && npm version"
+    "prepublishOnly": "npm run clean && npm run build && npm run build:docs:release"
   },
   "keywords": [
     "cli",
