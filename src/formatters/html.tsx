@@ -1,5 +1,6 @@
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import ReactMarkdown from 'react-markdown'
 import { cva } from 'class-variance-authority'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -215,10 +216,16 @@ function CommandSection({ entry }: { entry: CommandEntry }): React.JSX.Element {
 	)
 }
 
-function HtmlDocument({ root }: { root: CommandNode }): React.JSX.Element {
+export interface HtmlFormatOptions {
+	title?: string
+	readme?: string
+}
+
+function HtmlDocument({ root, options }: { root: CommandNode; options?: HtmlFormatOptions }): React.JSX.Element {
 	const commandEntries = flattenTree(root)
 
-	const title = `${root.path.join(' ')} CLI Documentation`
+	const title = options?.title?.trim() || `${root.path.join(' ')} CLI Documentation`
+	const readme = options?.readme?.trim()
 	const description = root.description ?? `Static CLI documentation for ${root.path.join(' ')}`
 	const searchDocument = buildSearchDocument(root, commandEntries, description)
 	const structuredData = buildStructuredData(root, commandEntries, title, description)
@@ -415,6 +422,14 @@ body {
 						</aside>
 
 						<main id="main-content" className="space-y-8">
+							{readme ? (
+								<section className={cn(cardClass, 'px-6 py-6 md:px-8 md:py-8')} aria-label="README">
+									<SectionTitle>README</SectionTitle>
+									<div className="prose prose-emerald mt-4 max-w-none text-foreground dark:prose-invert">
+										<ReactMarkdown>{readme}</ReactMarkdown>
+									</div>
+								</section>
+							) : null}
 							{commandEntries.map((entry) => (
 								<CommandSection key={entry.id} entry={entry} />
 							))}
@@ -529,6 +544,6 @@ body {
 	)
 }
 
-export function formatAsHtml(root: CommandNode): string {
-	return `<!DOCTYPE html>${renderToStaticMarkup(<HtmlDocument root={root} />)}\n`
+export function formatAsHtml(root: CommandNode, options?: HtmlFormatOptions): string {
+	return `<!DOCTYPE html>${renderToStaticMarkup(<HtmlDocument root={root} options={options} />)}\n`
 }

@@ -54,7 +54,8 @@ Examples:
 ```bash
 cmdgraph generate git --format=json --format=md --output=./docs
 cmdgraph generate git --format=html --output=./site
-cmdgraph generate git --format=html --format=llms-txt --format=sitemap --site-base-url=https://docs.example.com/git/ --root-command-name=cmdgraph --output=./site
+cmdgraph generate git --format=html --output-html-title="Git CLI Docs" --output-html-readme=README.md --output=./site
+cmdgraph generate git --format=html --format=llms-txt --format=sitemap --output-root-command-name=cmdgraph --output-llms-txt-base-url=https://docs.example.com/git/ --output-sitemap-base-url=https://docs.example.com/git/ --output=./site
 cmdgraph generate git --max-depth=3 --concurrency=4 --format=json --output=./docs
 cmdgraph generate kubectl --max-depth=3 --timeout=8000 --format=json --output=./docs
 cmdgraph generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --output=./docs
@@ -64,10 +65,10 @@ cmdgraph generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --out
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `--max-depth` | integer | unset | Maximum recursion depth for subcommands (when unset, crawl continues until leaf commands) |
+| `--max-depth` | integer |  | Maximum recursion depth for subcommands (when , crawl continues until leaf commands) |
 | `--concurrency` | integer | `4` | Maximum number of help commands to run in parallel |
 | `--timeout` | integer | `5000` | Per-command timeout in ms |
-| `--parser` | string | auto-detect | Force a parser plugin by name |
+| `--parser` | string |  | Force a parser plugin by name |
 
 ### Output options
 
@@ -75,8 +76,11 @@ cmdgraph generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --out
 | --- | --- | --- | --- |
 | `--format` | repeatable `json \| md \| html \| llms-txt \| sitemap` | `json` | Output format; repeat the flag to write multiple outputs |
 | `--output` | string | `./docs` | Output directory |
-| `--site-base-url` | string | unset | Base URL used to generate discovery artifacts such as `llms.txt` links and `sitemap.xml` |
-| `--root-command-name` | string | unset | Override the displayed root command name in generated outputs |
+| `--output-root-command-name` | string |  | Override the displayed root command name in generated outputs |
+| `--output-html-title` | string |  | Set HTML page title |
+| `--output-html-readme` | string |  | Path to a `.md` file rendered as a README section in the HTML page |
+| `--output-llms-txt-base-url` | string |  | Base URL used to generate `llms.txt` links |
+| `--output-sitemap-base-url` | string |  | Base URL used to generate `sitemap.xml` links (required for sitemap output) |
 
 ## Library Usage
 
@@ -94,8 +98,11 @@ const generated = await generate('git', {
 	timeout: 5000,
 	concurrency: 4,
 	parser: 'heuristic',
-	rootCommandName: 'cmdgraph',
-	siteBaseUrl: 'https://docs.example.com/git/',
+	'output-root-command-name': 'cmdgraph',
+	'output-html-title': 'Git CLI Documentation',
+	'output-html-readme': './README.md',
+	'output-llms-txt-base-url': 'https://docs.example.com/git/',
+	'output-sitemap-base-url': 'https://docs.example.com/git/',
 	format: ['json', 'md', 'html', 'llms-txt', 'sitemap'],
 })
 
@@ -112,9 +119,11 @@ Library API notes:
 - `generate(command, options)` returns `{ tree, json?, markdown?, html?, llmsTxt?, sitemap?, warnings }`
 - omit `maxDepth`/`max-depth` to recurse until leaf commands; set it explicitly to cap traversal depth
 - `options.format` supports `json`, `md`, `html`, `llms-txt`, and `sitemap`; pass an array for multiple outputs, and omit it to default to JSON
-- `options.siteBaseUrl` is required for `sitemap` and is recommended for `llms-txt`
-- `options.rootCommandName` overrides the displayed root command name in generated outputs
-- `generate` options align with CLI flag names: `max-depth`, `timeout`, `concurrency`, `parser`, `format`, `siteBaseUrl`, and `rootCommandName`
+- `options.output-root-command-name` overrides the displayed root command name in generated outputs
+- `options.output-html-title` customizes the HTML page title
+- `options.output-html-readme` points to a `.md` file to render as a README section in HTML output
+- `options.output-sitemap-base-url` is required for `sitemap`; `options.output-llms-txt-base-url` controls `llms.txt` links
+- `generate` options align with CLI flag names: `max-depth`, `timeout`, `concurrency`, `parser`, `format`, `output-root-command-name`, `output-html-title`, `output-html-readme`, `output-llms-txt-base-url`, and `output-sitemap-base-url`
 - advanced injection (`executor`, `parserRegistry`) is available for tests/custom integration
 
 ## Supported Parsers
@@ -144,7 +153,7 @@ Parser selection behavior:
 
 ## Output
 
-For `cmdgraph generate git --format=json --format=md --format=html --format=llms-txt --format=sitemap --site-base-url=https://docs.example.com/git/ --output=./docs`, you get:
+For `cmdgraph generate git --format=json --format=md --format=html --format=llms-txt --format=sitemap --output-llms-txt-base-url=https://docs.example.com/git/ --output-sitemap-base-url=https://docs.example.com/git/ --output=./docs`, you get:
 
 - `docs/git.json`
 - `docs/git.md`
@@ -210,7 +219,7 @@ HTML output characteristics:
 Discovery artifact characteristics:
 
 - `llms.txt` is generated separately and lists the hosted documentation page plus command-level anchors
-- `sitemap.xml` is generated separately and requires `--site-base-url` so it contains valid deployable URLs
+- `sitemap.xml` is generated separately and requires `--output-sitemap-base-url` so it contains valid deployable URLs
 - HTML output does not implicitly generate either file; request them explicitly with `--format=llms-txt` and `--format=sitemap`
 
 ## Agent Reference Guide (Packaged JSON)
