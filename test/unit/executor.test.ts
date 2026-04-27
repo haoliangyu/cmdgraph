@@ -1,6 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { execa } from 'execa'
-import { HelpExecutionTimeoutError, clearHelpCommandCache, runHelpCommand } from '../../src/core/executor.js'
+import {
+  HelpExecutionTimeoutError,
+  VersionExecutionTimeoutError,
+  clearHelpCommandCache,
+  clearVersionCommandCache,
+  runHelpCommand,
+  runVersionCommand,
+} from '../../src/core/executor.js'
 
 vi.mock('execa', () => ({
   execa: vi.fn(),
@@ -9,6 +16,7 @@ vi.mock('execa', () => ({
 describe('runHelpCommand', () => {
   beforeEach(() => {
     clearHelpCommandCache()
+    clearVersionCommandCache()
     vi.clearAllMocks()
   })
 
@@ -109,5 +117,71 @@ describe('runHelpCommand', () => {
 
     await expect(runHelpCommand(['docker'], 1000)).resolves.toBe('fresh help text')
     expect(execa).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('runVersionCommand', () => {
+  beforeEach(() => {
+    clearVersionCommandCache()
+    vi.clearAllMocks()
+  })
+
+  it('returns command output from -v', async () => {
+    vi.mocked(execa).mockResolvedValueOnce({ all: 'tool 1.2.3' } as Awaited<ReturnType<typeof execa>>)
+
+    const output = await runVersionCommand(['tool'], 2000)
+
+    expect(output).toBe('tool 1.2.3')
+    expect(execa).toHaveBeenCalledWith(
+      'tool',
+      ['-v'],
+      expect.objectContaining({ timeout: 2000 }),
+    )
+  })
+
+  it('falls back to --version and version when earlier probes have no output', async () => {
+    vi.mocked(execa)
+      .mockResolvedValueOnce({ all: '' } as Awaited<ReturnType<typeof execa>>)
+      .mockResolvedValueOnce({ all: '' } as Awaited<ReturnType<typeof execa>>)
+      .mockResolvedValueOnce({ all: 'tool version 3.4.5' } as Awaited<ReturnType<typeof execa>>)
+
+    const output = await runVersionCommand(['tool'], 2000)
+
+    expect(output).toBe('tool version 3.4.5')
+    expect(execa).toHaveBeenNthCalledWith(
+      1,
+      'tool',
+      ['-v'],
+      expect.objectContaining({ timeout: 2000 }),
+    )
+    expect(execa).toHaveBeenNthCalledWith(
+      2,
+      'tool',
+      ['--version'],
+      expect.objectContaining({ timeout: 2000 }),
+    )
+    expect(execa).toHaveBeenNthCalledWith(
+      3,
+      'tool',
+      ['version'],
+      expect.objectContaining({ timeout: 2000 }),
+    )
+  })
+
+  it('throws timeout error when execution times out', async () => {
+    vi.mocked(execa).mockRejectedValueOnce(new Error('Command timed out after 1000 milliseconds'))
+
+    await expect(runVersionCommand(['docker'], 1000)).rejects.toBeInstanceOf(VersionExecutionTimeoutError)
+  })
+
+  it('reuses cached output for identical version requests', async () => {
+    vi.mocked(execa).mockResolvedValueOnce({ all: 'cached version text' } as Awaited<ReturnType<typeof execa>>)
+
+    const first = await runVersionCommand(['git'], 2000)
+    const second = await runVersionCommand(['git'], 2000)
+
+    expect(first).toBe('cached version text')
+    expect(second).toBe('cached version text')
+    expect(execa).toHaveBeenCalledTimes(1)
   })
 })

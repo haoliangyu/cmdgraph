@@ -1,4 +1,5 @@
 import type { CLIParser } from '../core/parser.js'
+import { extractVersionFromText } from '../core/version.js'
 import type { ParsedCommand } from '../types.js'
 
 function isSectionHeading(line: string): boolean {
@@ -257,6 +258,84 @@ function extractExamples(lines: string[]): string[] {
   return uniqueValues(examples)
 }
 
+function isLikelyOptionLine(line: string): boolean {
+  const trimmed = line.trim()
+  if (!trimmed) {
+    return false
+  }
+
+  if (trimmed.startsWith('-') || trimmed.startsWith('[')) {
+    return true
+  }
+
+  return /^\S+\s{2,}.+$/.test(trimmed)
+}
+
+function extractVersion(lines: string[]): string | undefined {
+  // Prefer explicit version headings/labels, then fallback to first meaningful lines.
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i]?.trim() ?? ''
+    if (!line) {
+      continue
+    }
+
+    const inlineMatch = line.match(/^version\s*[:=]\s*(.+)$/i)
+    if (inlineMatch?.[1]) {
+      const token = extractVersionFromText(inlineMatch[1])
+      if (token) {
+        return token
+      }
+    }
+
+    if (!/^version:?$/i.test(line)) {
+      continue
+    }
+
+    for (let j = i + 1; j < lines.length && j <= i + 4; j += 1) {
+      const candidate = lines[j]?.trim() ?? ''
+      if (!candidate) {
+        continue
+      }
+
+      if (isSectionHeading(candidate)) {
+        break
+      }
+
+      const token = extractVersionFromText(candidate)
+      if (token) {
+        return token
+      }
+    }
+  }
+
+  const maxLines = Math.min(lines.length, 10)
+  for (let i = 0; i < maxLines; i += 1) {
+    const line = lines[i]?.trim() ?? ''
+    if (!line) {
+      continue
+    }
+
+    if (/--version|\[-v\]|\[--version\]/i.test(line)) {
+      continue
+    }
+
+    if (isLikelyOptionLine(line)) {
+      continue
+    }
+
+    if (!/\bversion\b/i.test(line) && i > 1) {
+      continue
+    }
+
+    const token = extractVersionFromText(line)
+    if (token) {
+      return token
+    }
+  }
+
+  return undefined
+}
+
 function extractName(lines: string[]): string {
   const usage = extractUsage(lines)
   if (usage) {
@@ -341,6 +420,7 @@ export class HeuristicParser implements CLIParser {
     return {
       name: extractName(lines),
       description: extractDescription(lines),
+      version: extractVersion(lines),
       usage,
       aliases: extractAliases(lines),
       arguments: argumentsList,

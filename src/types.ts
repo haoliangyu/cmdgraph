@@ -6,6 +6,7 @@ export interface Option {
 export interface ParsedCommand {
   name: string
   description?: string
+  version?: string
   usage?: string
   aliases: string[]
   arguments: string[]

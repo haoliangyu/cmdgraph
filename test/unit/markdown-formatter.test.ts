@@ -7,6 +7,7 @@ describe('formatAsMarkdown', () => {
     const root: CommandNode = {
       name: 'tool',
       description: 'A test command.',
+      version: '1.2.3',
       usage: 'tool <source> [DEST]',
       aliases: ['t', 'tl'],
       arguments: ['<source>', 'DEST'],
@@ -20,6 +21,7 @@ describe('formatAsMarkdown', () => {
     const markdown = formatAsMarkdown(root)
 
     expect(markdown).toContain('**Aliases:** `t`, `tl`')
+    expect(markdown).toContain('**Version:** `1.2.3`')
     expect(markdown).toContain('**Arguments**')
     expect(markdown).toContain('- `<source>`')
     expect(markdown).toContain('- `DEST`')

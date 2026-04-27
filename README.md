@@ -23,7 +23,7 @@ Most CLIs are documented in unstructured terminal text. `cmdgraph` turns that in
 
 - Recursive command discovery from `--help`, `-h`, `-H`, or `help`
 - Plugin parser system (`heuristic`, `oclif`, `commander`, `yargs`, `cobra`, `thor`, `picocli`, `urfave-cli`, `system-commandline`, `commandlineparser`, `click`, `typer`, `clap`, `argparse`)
-- Best-effort metadata extraction for arguments, examples, and aliases
+- Best-effort metadata extraction for version, arguments, examples, and aliases
 - Concurrency control for recursive help crawling
 - Automatic in-memory caching of help outputs within a process
 - Timeout-safe command execution using `execa`
@@ -226,6 +226,7 @@ JSON shape:
 {
 	"name": "git",
 	"description": "The stupid content tracker",
+	"version": "2.49.0",
 	"usage": "git [options] [command]",
 	"aliases": [],
 	"arguments": [],
@@ -248,6 +249,8 @@ Matching Markdown output:
 The stupid content tracker
 
 **Usage:** `git [options] [command]`
+
+**Version:** `2.49.0`
 
 **Options**
 - `-h, --help`: display help

@@ -108,4 +108,23 @@ FLAGS
     expect(parsed.arguments).toContain('COMMAND')
     expect(parsed.subcommands).not.toContain('COMMAND')
   })
+
+  it('extracts version from explicit VERSION heading blocks', async () => {
+    const parsed = heuristicParser.parse(await fixture('oclif-help.txt'))
+
+    expect(parsed.version).toBe('1.0.0')
+  })
+
+  it('extracts inline version labels and ignores --version option lines', () => {
+    const parsed = heuristicParser.parse(`mytool version: 2.4.1
+
+Usage: mytool [options]
+
+Options:
+  -v, --version   Print version
+  -h, --help      Show help
+`)
+
+    expect(parsed.version).toBe('2.4.1')
+  })
 })

@@ -14,6 +14,10 @@ function formatNode(node: CommandNode, depth: number): string {
     sections.push(`**Usage:** \`${node.usage}\``)
   }
 
+  if (node.version) {
+    sections.push(`**Version:** \`${node.version}\``)
+  }
+
   if (node.aliases.length > 0) {
     sections.push(`**Aliases:** ${node.aliases.map((alias) => `\`${alias}\``).join(', ')}`)
   }

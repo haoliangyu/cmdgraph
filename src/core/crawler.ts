@@ -1,6 +1,7 @@
 import pLimit from 'p-limit'
-import { runHelpCommand } from './executor.js'
+import { runHelpCommand, runVersionCommand } from './executor.js'
 import { createDefaultParserRegistry, ParserRegistry } from './parser-registry.js'
+import { extractVersionFromText } from './version.js'
 import type { CommandNode, ParsedCommand } from '../types.js'
 
 export interface CrawlOptions {
@@ -10,6 +11,7 @@ export interface CrawlOptions {
   parserName?: string
   parserRegistry?: ParserRegistry
   executor?: (commandPath: string[], timeoutMs: number) => Promise<string>
+  versionExecutor?: (commandPath: string[], timeoutMs: number) => Promise<string>
   onWarning?: (message: string) => void
 }
 
@@ -50,6 +52,7 @@ export async function crawlCommandTree(rootCommand: string, options: CrawlOption
     parserName,
     parserRegistry = createDefaultParserRegistry(),
     executor = runHelpCommand,
+    versionExecutor = runVersionCommand,
     onWarning,
   } = options
 
@@ -65,6 +68,18 @@ export async function crawlCommandTree(rootCommand: string, options: CrawlOption
       const helpText = await limit(() => executor(commandPath, timeoutMs))
       const parser = parserRegistry.select(helpText, parserName)
       parsed = parser.parse(helpText)
+
+      if (!parsed.version) {
+        try {
+          const versionOutput = await limit(() => versionExecutor(commandPath, timeoutMs))
+          const version = extractVersionFromText(versionOutput)
+          if (version) {
+            parsed = { ...parsed, version }
+          }
+        } catch {
+          // Version probing is best-effort and should never block command discovery.
+        }
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
       onWarning?.(`Skipping \"${normalizedPath}\": ${message}`)

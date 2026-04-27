@@ -166,4 +166,34 @@ describe('crawlCommandTree', () => {
     expect(maxActive).toBeLessThanOrEqual(2)
     expect(maxActive).toBeGreaterThan(1)
   })
+
+  it('probes version output when help text does not include a version', async () => {
+    const outputs = new Map<string, string>([
+      [
+        'tool',
+        [
+          'Usage: tool [command]',
+          '',
+          'Commands:',
+          '  alpha    Alpha command',
+        ].join('\n'),
+      ],
+      ['tool alpha', 'Usage: tool alpha'],
+    ])
+
+    const versionOutputs = new Map<string, string>([
+      ['tool', 'tool version 9.8.7'],
+      ['tool alpha', ''],
+    ])
+
+    const tree = await crawlCommandTree('tool', {
+      maxDepth: 1,
+      timeoutMs: 1000,
+      executor: async (path) => outputs.get(path.join(' ')) ?? '',
+      versionExecutor: async (path) => versionOutputs.get(path.join(' ')) ?? '',
+    })
+
+    expect(tree.version).toBe('9.8.7')
+    expect(tree.children[0]?.version).toBeUndefined()
+  })
 })
