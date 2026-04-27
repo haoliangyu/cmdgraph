@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added JSON config file support for `generate`, with automatic loading from `./cmdgraph.config.json` when present.
+- Added `--config` to load options and flags from any JSON file path.
+- Added support for nested config categories (for example, `crawler` and `output.*`) while preserving existing flat flag-name mappings.
+
 ## [0.3.0] - 2026-04-12
 
 ### Changed

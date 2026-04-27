@@ -23,8 +23,8 @@
   "scripts": {
     "cmdgraph": "npm run build && node ./dist/index.js",
     "build": "tsc -p tsconfig.json",
-    "build:docs": "npm run build && node ./dist/index.js generate \"node ./dist/index.js\" --format=html --format=llms-txt --format=sitemap --output-root-command-name=cmdgraph --output-html-title=cmdgraph --output-html-project-link=https://github.com/haoliangyu/cmdgraph --output-llms-txt-base-url=https://haoliangyu.github.io/cmdgraph/ --output-sitemap-base-url=https://haoliangyu.github.io/cmdgraph/ --output=./docs",
-    "build:docs:release": "npm run build && node ./dist/index.js generate \"node ./dist/index.js\" --format=json --output-root-command-name=cmdgraph --output=./dist/agent-reference && node -e \"const fs = require('node:fs'); fs.copyFileSync('./dist/agent-reference/node-distindexjs.json', './dist/agent-reference/cmdgraph.json')\"",
+    "build:docs": "npm run build && node ./dist/index.js generate \"node ./dist/index.js\" --config=./configs/cmdgraph.docs.config.json",
+    "build:docs:release": "npm run build && node ./dist/index.js generate \"node ./dist/index.js\" --config=./configs/cmdgraph.release.config.json && node -e \"const fs = require('node:fs'); fs.copyFileSync('./dist/agent-reference/node-distindexjs.json', './dist/agent-reference/cmdgraph.json')\"",
     "clean": "rm -rf dist coverage",
     "prepare": "husky",
     "lint": "eslint .",

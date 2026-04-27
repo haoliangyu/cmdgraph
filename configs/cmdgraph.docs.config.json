@@ -1,0 +1,17 @@
+{
+  "format": ["html", "llms-txt", "sitemap"],
+  "output": {
+    "directory": "./docs",
+    "rootCommandName": "cmdgraph",
+    "html": {
+      "title": "cmdgraph",
+      "projectLink": "https://github.com/haoliangyu/cmdgraph"
+    },
+    "llmsTxt": {
+      "baseUrl": "https://haoliangyu.github.io/cmdgraph/"
+    },
+    "sitemap": {
+      "baseUrl": "https://haoliangyu.github.io/cmdgraph/"
+    }
+  }
+}
