@@ -42,6 +42,10 @@ export function formatAsLlmsTxt(root: CommandNode, options: LlmsTxtOptions = {})
 			lines.push(`  Usage: ${entry.node.usage}`)
 		}
 
+		if (entry.node.version) {
+			lines.push(`  Version: ${entry.node.version}`)
+		}
+
 		if (entry.node.aliases.length > 0) {
 			lines.push(`  Aliases: ${entry.node.aliases.join(', ')}`)
 		}

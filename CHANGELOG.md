@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.0] - 2026-04-26
 
 ### Added
+- Added best-effort command `version` extraction and surfaced it in generated metadata/docs when available.
+- Added a version probe fallback that tries `-v`, then `--version`, then `version` when help output does not expose a parseable version.
+
+## [0.4.0] - 2026-04-26
+
+### Added
 - Added JSON config file support for `generate`, with automatic loading from `./cmdgraph.config.json` when present.
 - Added `--config` to load options and flags from any JSON file path.
 - Added support for nested config categories (for example, `crawler` and `output.*`) while preserving existing flat flag-name mappings.
