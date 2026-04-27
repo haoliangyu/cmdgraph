@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.4.0] - 2026-04-26
+## [0.5.0] - 2026-04-27
 
 ### Added
 - Added best-effort command `version` extraction and surfaced it in generated metadata/docs when available.
@@ -47,7 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release.
 
-[Unreleased]: https://github.com/haoliangyu/cmdgraph/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/haoliangyu/cmdgraph/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/haoliangyu/cmdgraph/releases/tag/v0.5.0
 [0.4.0]: https://github.com/haoliangyu/cmdgraph/releases/tag/v0.4.0
 [0.3.0]: https://github.com/haoliangyu/cmdgraph/releases/tag/v0.3.0
 [0.2.0]: https://github.com/haoliangyu/cmdgraph/releases/tag/v0.2.0
