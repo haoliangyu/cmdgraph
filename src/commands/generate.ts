@@ -10,6 +10,14 @@ import { formatAsJson } from '../formatters/json.js'
 import { formatAsLlmsTxt } from '../formatters/llms-txt.js'
 import { formatAsMarkdown } from '../formatters/markdown.js'
 import { formatAsSitemap } from '../formatters/sitemap.js'
+import {
+  DEFAULT_CONFIG_FILE_PATH,
+  DEFAULT_GENERATE_FLAGS,
+  getProvidedLongFlagNames,
+  loadGenerateConfigFlags,
+  pickCliGenerateOverrides,
+  type GenerateResolvedFlags,
+} from '../core/generate-config.js'
 
 function toSafeFileStem(command: string): string {
   return command.trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase()
@@ -61,6 +69,11 @@ export default class GenerateCommand extends Command {
       description: 'Force parser plugin name',
       helpGroup: 'Crawler options',
     }),
+    config: Flags.string({
+      description: 'Path to a JSON config file',
+      default: DEFAULT_CONFIG_FILE_PATH,
+      helpGroup: 'Configuration options',
+    }),
     'output-root-command-name': Flags.string({
       description: 'Override displayed root command name in generated outputs',
       helpGroup: 'Output options (general)',
@@ -89,30 +102,42 @@ export default class GenerateCommand extends Command {
 
   public async run(): Promise<void> {
     const { args, flags } = await this.parse(GenerateCommand)
+    const providedLongFlags = getProvidedLongFlagNames(this.argv)
+    const configFlags = await loadGenerateConfigFlags(flags.config, {
+      required: providedLongFlags.has('config'),
+    })
 
-    const formats = normalizeFormats(flags.format as OutputFormat[] | undefined)
-    if (formats.includes('sitemap') && !flags['output-sitemap-base-url']) {
+    const cliOverrides = pickCliGenerateOverrides(flags as GenerateResolvedFlags, providedLongFlags)
+    const resolvedFlags: GenerateResolvedFlags = {
+      ...DEFAULT_GENERATE_FLAGS,
+      ...configFlags,
+      ...cliOverrides,
+    }
+
+    const formats = normalizeFormats(resolvedFlags.format as OutputFormat[] | undefined)
+    if (formats.includes('sitemap') && !resolvedFlags['output-sitemap-base-url']) {
       this.error('--output-sitemap-base-url is required when using --format=sitemap')
   	}
 
-    const outputDir = resolve(flags.output)
+    const outputDir = resolve(resolvedFlags.output as string)
 
     await mkdir(outputDir, { recursive: true })
 
     const warnings: string[] = []
+    const timeoutMs = resolvedFlags.timeout ?? 5000
     const tree = await crawlCommandTree(args.command, {
-      concurrency: flags.concurrency,
-      maxDepth: flags['max-depth'],
-      timeoutMs: flags.timeout,
-      parserName: flags.parser,
+      concurrency: resolvedFlags.concurrency,
+      maxDepth: resolvedFlags['max-depth'],
+      timeoutMs,
+      parserName: resolvedFlags.parser,
       onWarning: (message) => warnings.push(message),
     })
 
-    const outputTree = withRootCommandName(tree, flags['output-root-command-name'])
+    const outputTree = withRootCommandName(tree, resolvedFlags['output-root-command-name'])
     let htmlReadmeMarkdown: string | undefined
 
-    if (flags['output-html-readme']) {
-      const readmePath = flags['output-html-readme'].trim()
+    if (resolvedFlags['output-html-readme']) {
+      const readmePath = resolvedFlags['output-html-readme'].trim()
       if (!readmePath.toLowerCase().endsWith('.md')) {
         this.error('--output-html-readme must point to a .md file')
       }
@@ -144,8 +169,8 @@ export default class GenerateCommand extends Command {
       await writeFile(
         htmlPath,
         formatAsHtml(outputTree, {
-          title: flags['output-html-title'],
-          projectLink: flags['output-html-project-link'],
+          title: resolvedFlags['output-html-title'],
+          projectLink: resolvedFlags['output-html-project-link'],
           readme: htmlReadmeMarkdown,
         }),
         'utf8',
@@ -155,13 +180,13 @@ export default class GenerateCommand extends Command {
 
     if (formats.includes('llms-txt')) {
       const llmsTxtPath = resolve(outputDir, 'llms.txt')
-      await writeFile(llmsTxtPath, formatAsLlmsTxt(outputTree, { siteBaseUrl: flags['output-llms-txt-base-url'] }), 'utf8')
+      await writeFile(llmsTxtPath, formatAsLlmsTxt(outputTree, { siteBaseUrl: resolvedFlags['output-llms-txt-base-url'] }), 'utf8')
       this.log(`Wrote ${llmsTxtPath}`)
     }
 
     if (formats.includes('sitemap')) {
       const sitemapPath = resolve(outputDir, 'sitemap.xml')
-      await writeFile(sitemapPath, formatAsSitemap(outputTree, { siteBaseUrl: flags['output-sitemap-base-url'] as string }), 'utf8')
+      await writeFile(sitemapPath, formatAsSitemap(outputTree, { siteBaseUrl: resolvedFlags['output-sitemap-base-url'] as string }), 'utf8')
       this.log(`Wrote ${sitemapPath}`)
     }
 

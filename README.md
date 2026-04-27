@@ -58,7 +58,49 @@ cmdgraph generate git --format=html --output-html-title="Git CLI Docs" --output-
 cmdgraph generate git --format=html --format=llms-txt --format=sitemap --output-root-command-name=cmdgraph --output-llms-txt-base-url=https://docs.example.com/git/ --output-sitemap-base-url=https://docs.example.com/git/ --output=./site
 cmdgraph generate git --max-depth=3 --concurrency=4 --format=json --output=./docs
 cmdgraph generate kubectl --max-depth=3 --timeout=8000 --format=json --output=./docs
+cmdgraph generate kubectl --config=./configs/cmdgraph.kubectl.json
 cmdgraph generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --output=./docs
+```
+
+### JSON configuration file
+
+`cmdgraph` can load options and flags from JSON.
+
+- By default, it reads `./cmdgraph.config.json` from the current working directory when the file exists.
+- Use `--config=<path>` to load any JSON file.
+- Explicit CLI flags always win over config values.
+
+Config keys support both flat flag names and grouped nested sections:
+
+```json
+{
+	"max-depth": 3,
+	"timeout": 8000,
+	"concurrency": 4,
+	"parser": "heuristic",
+	"format": ["json", "md"],
+	"output": {
+		"directory": "./docs",
+		"rootCommandName": "cmdgraph",
+		"html": {
+			"title": "cmdgraph CLI Docs",
+			"projectLink": "https://github.com/haoliangyu/cmdgraph",
+			"readme": "./README.md"
+		},
+		"llmsTxt": {
+			"baseUrl": "https://docs.example.com/cmdgraph/"
+		},
+		"sitemap": {
+			"baseUrl": "https://docs.example.com/cmdgraph/"
+		}
+	},
+	"crawler": {
+		"maxDepth": 3,
+		"timeout": 8000,
+		"concurrency": 4,
+		"parser": "heuristic"
+	}
+}
 ```
 
 ### Crawler options
@@ -69,6 +111,12 @@ cmdgraph generate "node ./tools/my-cli.mjs" --parser=heuristic --format=md --out
 | `--concurrency` | integer | `4` | Maximum number of help commands to run in parallel |
 | `--timeout` | integer | `5000` | Per-command timeout in ms |
 | `--parser` | string |  | Force a parser plugin by name |
+
+### Configuration options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--config` | string | `./cmdgraph.config.json` | Path to a JSON config file; if omitted, the default file is used only when it exists |
 
 ### Output options
 

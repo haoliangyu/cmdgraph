@@ -181,4 +181,112 @@ describe('integration: crawler + executor', () => {
       await rm(outDir, { recursive: true, force: true })
     }
   })
+
+  it('loads default cmdgraph.config.json from the current working directory', async () => {
+    const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
+    const cliEntry = resolve('dist/index.js')
+    const tempDir = await mkdtemp(resolve(tmpdir(), 'cmdgraph-default-config-'))
+
+    try {
+      await writeFile(
+        resolve(tempDir, 'cmdgraph.config.json'),
+        JSON.stringify({
+          crawler: {
+            maxDepth: 2,
+          },
+          output: {
+            format: ['json'],
+            directory: './docs-from-config',
+            rootCommandName: 'fixture-docs',
+          },
+        }),
+        'utf8',
+      )
+
+      await execa('node', [cliEntry, 'generate', `node ${fixtureCli}`], { cwd: tempDir })
+
+      const stem = toSafeFileStem(`node ${fixtureCli}`)
+      const jsonPath = resolve(tempDir, 'docs-from-config', `${stem}.json`)
+      const parsed = JSON.parse(await readFile(jsonPath, 'utf8')) as { path: string[] }
+
+      expect(parsed.path).toEqual(['fixture-docs'])
+    } finally {
+      await rm(tempDir, { recursive: true, force: true })
+    }
+  })
+
+  it('loads config from a custom JSON file passed with --config', async () => {
+    const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
+    const cliEntry = resolve('dist/index.js')
+    const tempDir = await mkdtemp(resolve(tmpdir(), 'cmdgraph-custom-config-'))
+    const configPath = resolve(tempDir, 'my-config.json')
+
+    try {
+      await writeFile(
+        configPath,
+        JSON.stringify({
+          maxDepth: 1,
+          output: {
+            formats: ['md'],
+            directory: './site-from-custom-config',
+          },
+        }),
+        'utf8',
+      )
+
+      await execa('node', [cliEntry, 'generate', `node ${fixtureCli}`, `--config=${configPath}`], { cwd: tempDir })
+
+      const stem = toSafeFileStem(`node ${fixtureCli}`)
+      const markdownPath = resolve(tempDir, 'site-from-custom-config', `${stem}.md`)
+      const markdownContent = await readFile(markdownPath, 'utf8')
+
+      expect(markdownContent).toContain('## node')
+      expect(markdownContent).toContain('config')
+    } finally {
+      await rm(tempDir, { recursive: true, force: true })
+    }
+  })
+
+  it('lets explicit CLI flags override config values', async () => {
+    const fixtureCli = resolve('test/integration/fixtures/fakecli.mjs')
+    const cliEntry = resolve('dist/index.js')
+    const tempDir = await mkdtemp(resolve(tmpdir(), 'cmdgraph-config-cli-override-'))
+    const outDir = resolve(tempDir, 'override-output')
+
+    try {
+      await writeFile(
+        resolve(tempDir, 'cmdgraph.config.json'),
+        JSON.stringify({
+          crawler: {
+            maxDepth: 0,
+          },
+          output: {
+            format: ['md'],
+            directory: './should-not-be-used',
+          },
+        }),
+        'utf8',
+      )
+
+      await execa('node', [
+        cliEntry,
+        'generate',
+        `node ${fixtureCli}`,
+        '--max-depth=2',
+        '--format=json',
+        `--output=${outDir}`,
+      ], { cwd: tempDir })
+
+      const stem = toSafeFileStem(`node ${fixtureCli}`)
+      const jsonPath = resolve(outDir, `${stem}.json`)
+      const parsed = JSON.parse(
+        await readFile(jsonPath, 'utf8'),
+      ) as { children: Array<{ path: string[] }> }
+
+      expect(parsed.children.map((child) => child.path.at(-1))).toEqual(['config', 'user'])
+      await expect(readFile(resolve(outDir, `${stem}.md`), 'utf8')).rejects.toThrow()
+    } finally {
+      await rm(tempDir, { recursive: true, force: true })
+    }
+  })
 })

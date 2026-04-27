@@ -1,0 +1,7 @@
+{
+  "format": ["json"],
+  "output": {
+    "directory": "./dist/agent-reference",
+    "rootCommandName": "cmdgraph"
+  }
+}
