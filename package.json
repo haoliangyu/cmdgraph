@@ -1,6 +1,6 @@
 {
   "name": "cmdgraph",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "CLI documentation introspection tool for AI agents",
   "homepage": "https://github.com/haoliangyu/cmdgraph",
   "type": "module",

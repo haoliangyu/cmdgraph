@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-26
+
 ### Added
 - Added JSON config file support for `generate`, with automatic loading from `./cmdgraph.config.json` when present.
 - Added `--config` to load options and flags from any JSON file path.
@@ -39,7 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release.
 
-[Unreleased]: https://github.com/haoliangyu/cmdgraph/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/haoliangyu/cmdgraph/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/haoliangyu/cmdgraph/releases/tag/v0.4.0
 [0.3.0]: https://github.com/haoliangyu/cmdgraph/releases/tag/v0.3.0
 [0.2.0]: https://github.com/haoliangyu/cmdgraph/releases/tag/v0.2.0
 [0.1.0]: https://github.com/haoliangyu/cmdgraph/releases/tag/v0.1.0
