@@ -45,6 +45,7 @@ type SearchDocument = {
 		id: string
 		depth: number
 		description: string
+			version: string
 		usage: string
 		aliases: string[]
 		arguments: string[]
@@ -68,6 +69,7 @@ function buildSearchDocument(root: CommandNode, entries: CommandEntry[], descrip
 			id: entry.id,
 			depth: entry.depth,
 			description: entry.node.description ?? '',
+			version: entry.node.version ?? '',
 			usage: entry.node.usage ?? '',
 			aliases: entry.node.aliases,
 			arguments: entry.node.arguments,
@@ -128,6 +130,7 @@ function CommandSection({ entry }: { entry: CommandEntry }): React.JSX.Element {
 					{node.description ? <p className="max-w-3xl text-base leading-7 text-muted-foreground">{node.description}</p> : null}
 				</div>
 				<div className="flex flex-wrap gap-2 lg:max-w-xs lg:justify-end">
+					{node.version ? <Badge>Version {node.version}</Badge> : null}
 					{node.aliases.length > 0 ? <Badge variant="outline">{node.aliases.length} alias{node.aliases.length === 1 ? '' : 'es'}</Badge> : null}
 					{node.options.length > 0 ? <Badge variant="outline">{node.options.length} option{node.options.length === 1 ? '' : 's'}</Badge> : null}
 					{node.children.length > 0 ? <Badge variant="outline">{node.children.length} child command{node.children.length === 1 ? '' : 's'}</Badge> : null}

@@ -15,6 +15,7 @@ describe('framework parsers', () => {
 
     expect(parser.name).toBe('oclif')
     expect(parsed.name).toBe('acme')
+    expect(parsed.version).toBe('1.0.0')
     expect(parsed.subcommands).toEqual(['login', 'status'])
   })
 

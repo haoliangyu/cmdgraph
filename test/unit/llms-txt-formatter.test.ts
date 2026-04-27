@@ -7,6 +7,7 @@ describe('formatAsLlmsTxt', () => {
 		const root: CommandNode = {
 			name: 'tool',
 			description: 'A test command.',
+			version: '1.2.3',
 			usage: 'tool [command]',
 			aliases: ['tl'],
 			arguments: [],
@@ -35,6 +36,7 @@ describe('formatAsLlmsTxt', () => {
 		expect(output).toContain('# tool CLI Documentation')
 		expect(output).toContain('Primary HTML documentation: https://docs.example.com/cli/index.html')
 		expect(output).toContain('URL: https://docs.example.com/cli/index.html#tool-inspect')
+		expect(output).toContain('Version: 1.2.3')
 		expect(output).toContain('Options: -h, --help')
 	})
 })

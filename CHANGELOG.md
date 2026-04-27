@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added best-effort command `version` extraction and surfaced it in generated metadata/docs when available.
+- Added a version probe fallback that tries `-v`, then `--version`, then `version` when help output does not expose a parseable version.
+
 ## [0.4.0] - 2026-04-26
 
 ### Added

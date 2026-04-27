@@ -7,6 +7,7 @@ describe('formatAsHtml', () => {
 		const root: CommandNode = {
 			name: 'tool',
 			description: 'A test command.',
+			version: '1.2.3',
 			usage: 'tool [command]',
 			aliases: ['tl'],
 			arguments: ['<input>'],
@@ -40,6 +41,7 @@ describe('formatAsHtml', () => {
 		expect(html).toContain('id="command-search"')
 		expect(html).toContain('Filter by command, option, alias, or usage')
 		expect(html).toContain('Skip to content')
+		expect(html).toContain('Version 1.2.3')
 		expect(html).not.toContain('Source of truth: JSON')
 		expect(html).not.toContain('Overview')
 		expect(html).toContain('tool inspect')
