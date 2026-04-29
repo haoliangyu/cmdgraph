@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Reduced hangs during recursive command discovery by avoiding the bare `help` probe for nested subcommands. `cmdgraph` now keeps the `help` fallback only for root command help detection, preventing side-effectful subcommand execution.
+- Prevented recursive `... help help ...` branch expansion when a nested help command returns root-level usage output.
+
 ## [0.5.1] - 2026-04-28
 
 ### Fixed

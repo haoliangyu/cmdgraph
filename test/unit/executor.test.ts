@@ -61,7 +61,7 @@ describe('runHelpCommand', () => {
     )
   })
 
-  it('falls back to help subcommand after help flags produce no output', async () => {
+  it('falls back to help subcommand after help flags produce no output for root commands', async () => {
     vi.mocked(execa)
       .mockResolvedValueOnce({ all: '' } as Awaited<ReturnType<typeof execa>>)
       .mockResolvedValueOnce({ all: '' } as Awaited<ReturnType<typeof execa>>)
@@ -93,6 +93,36 @@ describe('runHelpCommand', () => {
       4,
       'aws',
       ['help'],
+      expect.objectContaining({ timeout: 2000 }),
+    )
+  })
+
+  it('does not try bare help fallback for subcommands', async () => {
+    vi.mocked(execa)
+      .mockResolvedValueOnce({ all: '' } as Awaited<ReturnType<typeof execa>>)
+      .mockResolvedValueOnce({ all: '' } as Awaited<ReturnType<typeof execa>>)
+      .mockResolvedValueOnce({ all: '' } as Awaited<ReturnType<typeof execa>>)
+
+    const output = await runHelpCommand(['zephyrcmd', 'update'], 2000)
+
+    expect(output).toBe('')
+    expect(execa).toHaveBeenCalledTimes(3)
+    expect(execa).toHaveBeenNthCalledWith(
+      1,
+      'zephyrcmd',
+      ['update', '--help'],
+      expect.objectContaining({ timeout: 2000 }),
+    )
+    expect(execa).toHaveBeenNthCalledWith(
+      2,
+      'zephyrcmd',
+      ['update', '-h'],
+      expect.objectContaining({ timeout: 2000 }),
+    )
+    expect(execa).toHaveBeenNthCalledWith(
+      3,
+      'zephyrcmd',
+      ['update', '-H'],
       expect.objectContaining({ timeout: 2000 }),
     )
   })

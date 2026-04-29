@@ -35,6 +35,26 @@ function normalizePath(path: string[]): string {
   return path.join(' ')
 }
 
+function normalizeForContainment(value: string): string {
+  return value.trim().replace(/\s+/g, ' ').toLowerCase()
+}
+
+function isUnscopedNestedHelp(commandPath: string[], usage: string | undefined): boolean {
+  if (commandPath.length < 2) {
+    return false
+  }
+
+  const currentToken = commandPath[commandPath.length - 1]?.toLowerCase()
+  if (currentToken !== 'help' || !usage) {
+    return false
+  }
+
+  const normalizedUsage = normalizeForContainment(usage)
+  const normalizedPath = normalizeForContainment(normalizePath(commandPath))
+
+  return !normalizedUsage.includes(normalizedPath)
+}
+
 function resolveNodeName(parsedName: string | undefined, commandPath: string[], normalizedPath: string): string {
   const candidate = parsedName?.trim()
   if (candidate && candidate.toLowerCase() !== 'unknown') {
@@ -91,6 +111,10 @@ export async function crawlCommandTree(rootCommand: string, options: CrawlOption
       name: resolveNodeName(parsed.name, commandPath, normalizedPath),
       path: [...commandPath],
       children: [],
+    }
+
+    if (isUnscopedNestedHelp(commandPath, parsed.usage)) {
+      return node
     }
 
     if (maxDepth !== undefined && depth >= maxDepth) {

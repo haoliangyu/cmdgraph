@@ -196,4 +196,35 @@ describe('crawlCommandTree', () => {
     expect(tree.version).toBe('9.8.7')
     expect(tree.children[0]?.version).toBeUndefined()
   })
+
+  it('does not recurse nested help branches when usage resolves to root command', async () => {
+    const rootHelp = [
+      'USAGE',
+      '  $ zephyrcmd [COMMAND]',
+      '',
+      'COMMANDS',
+      '  help     Display help for zephyrcmd.',
+      '  update   update the zephyrcmd CLI',
+      '  version',
+    ].join('\n')
+
+    const outputs = new Map<string, string>([
+      ['zephyrcmd', rootHelp],
+      ['zephyrcmd help', rootHelp],
+      ['zephyrcmd update', 'USAGE\n  $ zephyrcmd update [CHANNEL]'],
+      ['zephyrcmd version', 'USAGE\n  $ zephyrcmd version'],
+    ])
+
+    const tree = await crawlCommandTree('zephyrcmd', {
+      timeoutMs: 1000,
+      executor: async (path) => outputs.get(path.join(' ')) ?? rootHelp,
+      versionExecutor: async () => '',
+    })
+
+    expect(tree.children.map((child) => child.path.join(' '))).toEqual([
+      'zephyrcmd help',
+      'zephyrcmd update',
+    ])
+    expect(tree.children[0]?.children).toHaveLength(0)
+  })
 })
