@@ -40,7 +40,10 @@ export async function runHelpCommand(commandPath: string[], timeoutMs: number): 
 
   const pending = (async () => {
     try {
-      const attempts = [[...args, '--help'], [...args, '-h'], [...args, '-H'], [...args, 'help']]
+      const attempts = [[...args, '--help'], [...args, '-h'], [...args, '-H']]
+      if (commandPath.length === 1) {
+        attempts.push([...args, 'help'])
+      }
 
       for (const fullArgs of attempts) {
         const result = await execa(binary, fullArgs, {
