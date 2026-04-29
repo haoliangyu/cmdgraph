@@ -21,7 +21,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "cmdgraph": "npm run build && node ./dist/index.js",
+    "cmdgraph": "npm run build && node ./bin/run.js",
     "build": "tsc -p tsconfig.json",
     "build:docs": "npm run build && node ./dist/index.js generate \"node ./dist/index.js\" --config=./configs/cmdgraph.docs.config.json",
     "build:docs:release": "npm run build && node ./dist/index.js generate \"node ./dist/index.js\" --config=./configs/cmdgraph.release.config.json && node -e \"const fs = require('node:fs'); fs.copyFileSync('./dist/agent-reference/node-distindexjs.json', './dist/agent-reference/cmdgraph.json')\"",

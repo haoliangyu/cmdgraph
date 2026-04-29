@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Fixed CLI bootstrap so the `cmdgraph` bin entrypoint directly invokes oclif command execution, restoring `cmdgraph --help` and command dispatch when launched via `bin/run.js`.
+
 ## [0.5.0] - 2026-04-27
 
 ### Added
