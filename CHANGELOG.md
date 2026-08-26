@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Reduced hangs during recursive command discovery by avoiding the bare `help` probe for nested subcommands. `cmdgraph` now keeps the `help` fallback only for root command help detection, preventing side-effectful subcommand execution.
 - Prevented recursive `... help help ...` branch expansion when a nested help command returns root-level usage output.
+- Taught the yargs parser to read script-prefixed command listings (`bru import <type>`), nested help without a `Usage:` heading, and `Positionals:` blocks so tools such as Bruno CLI are crawled instead of stopping at the root.
 
 ## [0.5.1] - 2026-04-28
 

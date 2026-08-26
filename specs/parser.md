@@ -112,7 +112,7 @@ The heuristic parser currently uses a tolerant, section-based strategy:
 
 This strategy is intended to work across Git-style, Docker-style, Kubectl/Cobra-style, and similar outputs.
 
-Specialized parser plugins (for example oclif, cobra, thor, picocli, urfave-cli, system-commandline, commandlineparser) may apply lightweight normalization before delegating to the heuristic parser so extraction remains stable while detection stays framework-aware.
+Specialized parser plugins (for example oclif, cobra, thor, yargs, picocli, urfave-cli, system-commandline, commandlineparser) may apply lightweight normalization before delegating to the heuristic parser so extraction remains stable while detection stays framework-aware.
 
 ## Examples
 
@@ -295,6 +295,29 @@ Expected parser behavior:
 - Parsed name resolves to `dotnet-clp` from usage.
 - Subcommands include `convert`, `inspect`.
 
+### Example I: yargs-style Commands (script-name prefix)
+
+Input snippet:
+
+```text
+Usage: bru <command> [options]
+
+Commands:
+  bru import <type>   Import a collection from other formats
+  bru run [paths...]  Run one or more requests/folders
+
+Options:
+      --version  Show version number  [boolean]
+  -h, --help     Show help            [boolean]
+```
+
+Expected parser behavior:
+
+- Specialized `yargs` parser is selected.
+- Parsed name resolves to `bru` from usage.
+- Subcommands include `import` and `run` (script-name prefix stripped).
+- Nested help such as `bru import <type>` without a `Usage:` heading still detects as yargs, names the command `import`, and reads `Positionals:` as arguments.
+
 ## Testing Guidance
 
 When adding/updating parser behavior:
@@ -302,7 +325,7 @@ When adding/updating parser behavior:
 - Add unit fixtures under `test/unit/fixtures`.
 - Add assertions in `test/unit/heuristic-parser.test.ts` (or parser-specific tests).
 - Cover at least one positive case and one ambiguity/regression case.
-- Keep real CLI variance covered by CI-only e2e tests in `test/e2e` (for Thor support, include Bundler CLI where available and auto-skip when unavailable; for picocli support, include a Java CLI such as Gradle where available and auto-skip when unavailable; for urfave support, include a Go urfave/cli binary where available and auto-skip when unavailable; for C# support, include System.CommandLine and CommandLineParser binaries where available and auto-skip when unavailable).
+- Keep real CLI variance covered by CI-only e2e tests in `test/e2e` (for Thor support, include Bundler CLI where available and auto-skip when unavailable; for picocli support, include a Java CLI such as Gradle where available and auto-skip when unavailable; for urfave support, include a Go urfave/cli binary where available and auto-skip when unavailable; for C# support, include System.CommandLine and CommandLineParser binaries where available and auto-skip when unavailable; for yargs support, include Bruno `bru` where available and auto-skip when unavailable).
 
 ## Extension Pattern for New Parsers
 

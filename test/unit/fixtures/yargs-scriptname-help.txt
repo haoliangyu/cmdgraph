@@ -1,0 +1,12 @@
+Bru CLI 4.0.0
+Usage: bru <command> [options]
+
+Commands:
+  bru import <type>   Import a collection from other formats
+  bru run [paths...]  Run one or more requests/folders
+
+Options:
+      --version  Show version number                                   [boolean]
+  -h, --help     Show help                                             [boolean]
+
+Documentation: https://docs.usebruno.com (v4.0.0)

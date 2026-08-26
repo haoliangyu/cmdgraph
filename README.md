@@ -184,7 +184,7 @@ Library API notes:
 - `heuristic`: default and fallback parser; handles common help layouts (`Usage`, `Commands`, `Options`/`Flags`); recommended for most tools.
 - `oclif`: parser for oclif-style CLIs (supports uppercase section blocks such as `USAGE`, `COMMANDS`, `FLAGS`).
 - `commander`: parser for Commander.js-style output (`display help for command`, `output the version number`).
-- `yargs`: parser for yargs-style output (`Show help`, `Show version number`, type hints like `[boolean]`).
+- `yargs`: parser for yargs-style output (`Show help`, `Show version number`, type hints like `[boolean]`); strips script-name prefixes from `Commands:` and maps `Positionals:` to arguments (e.g. Bruno CLI).
 - `cobra`: parser for Cobra-style CLIs (`Available Commands`, `Flags`, `Global Flags`).
 - `thor`: parser for Thor-style CLIs (`Usage: ... COMMAND [ARGS]`, `Commands`/`Tasks` headings, e.g. Bundler CLI).
 - `picocli`: parser for picocli-style Java CLIs (`Show this help message and exit.`, `Print version information and exit.`, e.g. Gradle).
