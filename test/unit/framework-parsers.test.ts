@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { createDefaultParserRegistry } from '../../src/core/parser-registry.js'
+import { heuristicParser } from '../../src/parsers/heuristic.js'
 
 async function fixture(name: string): Promise<string> {
   return readFile(resolve('test/unit/fixtures', name), 'utf8')
@@ -117,6 +118,34 @@ describe('framework parsers', () => {
     expect(parser.name).toBe('yargs')
     expect(parsed.name).toBe('mytool')
     expect(parsed.subcommands).toEqual(['serve', 'lint'])
+  })
+
+  it('detects yargs output that prefixes commands with the script name', async () => {
+    const helpText = await fixture('yargs-scriptname-help.txt')
+    const parser = createDefaultParserRegistry().select(helpText)
+    const parsed = parser.parse(helpText)
+
+    expect(parser.name).toBe('yargs')
+    expect(parsed.name).toBe('bru')
+    expect(parsed.version).toBe('4.0.0')
+    expect(parsed.subcommands).toEqual(['import', 'run'])
+    expect(heuristicParser.parse(helpText).subcommands).toEqual([])
+    expect(parsed.description).toBeUndefined()
+    expect(parsed.options.some((option) => option.flag.includes('--help'))).toBe(true)
+  })
+
+  it('detects nested yargs help without a Usage heading', async () => {
+    const helpText = await fixture('yargs-nested-help.txt')
+    const parser = createDefaultParserRegistry().select(helpText)
+    const parsed = parser.parse(helpText)
+
+    expect(parser.name).toBe('yargs')
+    expect(parsed.name).toBe('import')
+    expect(parsed.usage).toBe('bru import <type>')
+    expect(parsed.description).toBe('Import a collection from other formats')
+    expect(parsed.subcommands).toEqual([])
+    expect(parsed.arguments).toEqual(expect.arrayContaining(['<type>', 'type']))
+    expect(parsed.examples.length).toBeGreaterThan(0)
   })
 
   it('detects and parses argparse output', async () => {

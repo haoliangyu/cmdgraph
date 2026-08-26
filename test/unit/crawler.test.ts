@@ -227,4 +227,61 @@ describe('crawlCommandTree', () => {
     ])
     expect(tree.children[0]?.children).toHaveLength(0)
   })
+
+  it('discovers yargs subcommands that are prefixed with the script name', async () => {
+    const outputs = new Map<string, string>([
+      [
+        'bru',
+        [
+          'Bru CLI 4.0.0',
+          'Usage: bru <command> [options]',
+          '',
+          'Commands:',
+          '  bru import <type>   Import a collection from other formats',
+          '  bru run [paths...]  Run one or more requests/folders',
+          '',
+          'Options:',
+          '      --version  Show version number                                   [boolean]',
+          '  -h, --help     Show help                                             [boolean]',
+        ].join('\n'),
+      ],
+      [
+        'bru import',
+        [
+          'Bru CLI 4.0.0',
+          'bru import <type>',
+          '',
+          'Import a collection from other formats',
+          '',
+          'Options:',
+          '      --version  Show version number                                   [boolean]',
+          '  -h, --help     Show help                                             [boolean]',
+        ].join('\n'),
+      ],
+      [
+        'bru run',
+        [
+          'Bru CLI 4.0.0',
+          'bru run [paths...]',
+          '',
+          'Run one or more requests/folders',
+          '',
+          'Options:',
+          '      --version  Show version number                                   [boolean]',
+          '  -h, --help     Show help                                             [boolean]',
+        ].join('\n'),
+      ],
+    ])
+
+    const tree = await crawlCommandTree('bru', {
+      timeoutMs: 1000,
+      executor: async (path) => outputs.get(path.join(' ')) ?? '',
+      versionExecutor: async () => '',
+    })
+
+    expect(tree.name).toBe('bru')
+    expect(tree.children.map((child) => child.path.join(' '))).toEqual(['bru import', 'bru run'])
+    expect(tree.children.map((child) => child.name)).toEqual(['import', 'run'])
+    expect(tree.children.map((child) => child.children)).toEqual([[], []])
+  })
 })

@@ -1,0 +1,18 @@
+Bru CLI 4.0.0
+bru import <type>
+
+Import a collection from other formats
+
+Positionals:
+  type  Type of collection to import
+                                [string] [required] [choices: "openapi", "wsdl"]
+
+Options:
+      --version            Show version number                         [boolean]
+  -h, --help               Show help                                   [boolean]
+  -s, --source             Path to the source file or URL    [string] [required]
+      --insecure           Skip SSL certificate verification when fetching from
+                           URLs                       [boolean] [default: false]
+
+Examples:
+  bru import openapi --source api.yml --output ./collection
